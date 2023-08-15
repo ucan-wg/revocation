@@ -11,7 +11,7 @@
 
 # 0. Abstract
 
-This document describes how to revoke a previously issued delegation.
+This specification describes how to revoke a previously issued UCAN delegation.
 
 ## Language
 
@@ -19,15 +19,21 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 
 # 1. Introduction
 
-## 1.1 Motivation
-
-## 2.9 Revocation
-
 Revocation is the act of invalidating a UCAN after the fact, outside of the limitations placed on it by the UCAN's fields (such as its expiry). 
 
 In the case of UCAN, this MUST be done by a proof's issuer DID. For more on the exact mechanism, see the revocation validation section.
 
-## 6.6 Revocation
+## 1.1 Motivation
+
+Even when not in error, the trust relationship between a delegator and delegatee are not immutible. While the UCAN delegation approach RECOMMENDS using the [principle of least authority][POLA], unexpected conditions can and do arise. This is an exceptional case, but is sufficiently important that a well defined method for performing revocation is needed.
+
+## 1.1 Approach
+
+UCAN delegation is designed to be [local-first]. As such, [fail-stop] approach is thus not suitable for this context. 
+
+UCAN revocation is accomplished with an eventually consistent mechanism. Note that the delivery tradeoff often associated with eventually consistent systems only apply in the worst case: it is entirely possible to communicate directly with the resource server for resources that have a single source of truth. The extra generality allows UCAN revocations to work with structures like [CRDT]s, operate over gossip channels, and at the edge.
+
+# 2 Semantics
 
 Any issuer of a UCAN MAY later revoke that UCAN or the capabilities that have been derived from it further downstream in a proof chain.
 
@@ -41,15 +47,23 @@ It is RECOMMENDED that the canonical revocation store be kept as close to (or in
 
 Revocations MUST be irreversible. If the revocation was issued in error, a unique UCAN MAY be issued (e.g. by updating the nonce or changing the time bounds). This prevents confusion as the revocation moves through the network and makes revocation stores append-only and highly amenable to caching.
 
-# Format
+# 3 Format
 
-A revocation message MUST conform to the following JSON format:
+A revocation message MUST contain the following information:
+
+| Field | Type                     | Description                                                  | Required |
+|-------|--------------------------|--------------------------------------------------------------|----------|
+| `iss` | [DID]                    | The DID of the revoker                                       | Yes      |
+| `rev` | [CID]                    | The [canonical CID] of the UCAN being revoked                | Yes      |
+| `clg` | [base64-unpadded] string | The base64 encoded signature of `REVOKE:${canonicalUcanCid}` | Yes      |
+
+Since revocations MAY be passed between systems, supporting the canonical JSON encoding is REQUIRED:
 
 ``` js
 {
-  "iss": did,
-  "revoke": canonicalUcanCid,
-  "challenge": base64Unpadded(sign(did.privateKey, `REVOKE:${canonicalUcanCid}`))
+  "iss": "did:key:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnEGta2doK",
+  "rev": "bafkreia7l6bthgtpaaw4qbfacun6p4rt5rcorsognxgojvkyvhlmo7kf4a",
+  "clg": "FJi1Rnpj3/otydngacrwddFvwz/dTDsBv62uZDN2fZM"
 }
 ```
 
