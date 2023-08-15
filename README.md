@@ -19,13 +19,12 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 
 # 1. Introduction
 
-Revocation is the act of invalidating a UCAN after the fact, outside of the limitations placed on it by the UCAN's fields (such as its expiry). 
-
-In the case of UCAN, this MUST be done by a proof's issuer DID. For more on the exact mechanism, see the revocation validation section.
-
 ## 1.1 Motivation
 
-Even when not in error, the trust relationship between a delegator and delegatee are not immutible. While the UCAN delegation approach RECOMMENDS using the [principle of least authority][POLA], unexpected conditions can and do arise. This is an exceptional case, but is sufficiently important that a well defined method for performing revocation is needed.
+Even when not in error, the trust relationship between a delegator and delegatee are not immutible. While the UCAN delegation approach RECOMMENDS using the [principle of least authority][POLA], unexpected conditions can and do arise. This is an exceptional case, but is sufficiently important that a well defined method for performing revocation is needed. Revocation is the act of invalidating a UCAN after the fact, outside of the limitations placed on it by the UCAN's fields (such as its expiry). 
+
+Expiry is preferred, but
+Manual method beyond expiry
 
 ## 1.1 Approach
 
@@ -33,7 +32,11 @@ UCAN delegation is designed to be [local-first]. As such, [fail-stop] approach i
 
 UCAN revocation is accomplished with an eventually consistent mechanism. Note that the delivery tradeoff often associated with eventually consistent systems only apply in the worst case: it is entirely possible to communicate directly with the resource server for resources that have a single source of truth. The extra generality allows UCAN revocations to work with structures like [CRDT]s, operate over gossip channels, and at the edge.
 
+In the case of UCAN, this MUST be done by a proof's issuer DID. For more on the exact mechanism, see the revocation validation section.
+
 # 2 Semantics
+
+- Invidates proofs, but can still be valid because constructive
 
 Any issuer of a UCAN MAY later revoke that UCAN or the capabilities that have been derived from it further downstream in a proof chain.
 
@@ -45,35 +48,7 @@ Every resource type SHOULD have a canonical location where its revocations are k
 
 It is RECOMMENDED that the canonical revocation store be kept as close to (or inside) the resource it is about as possible. For example, the WebNative File System maintains a Merkle tree of revoked CIDs at a well-known path. Another example is that a centralized server could have an endpoint that lists the revoked UCANs by [canonical CID].
 
-Revocations MUST be irreversible. If the revocation was issued in error, a unique UCAN MAY be issued (e.g. by updating the nonce or changing the time bounds). This prevents confusion as the revocation moves through the network and makes revocation stores append-only and highly amenable to caching.
-
-# 3 Format
-
-A revocation message MUST contain the following information:
-
-| Field | Type                     | Description                                                  | Required |
-|-------|--------------------------|--------------------------------------------------------------|----------|
-| `iss` | [DID]                    | The DID of the revoker                                       | Yes      |
-| `rev` | [CID]                    | The [canonical CID] of the UCAN being revoked                | Yes      |
-| `clg` | [base64-unpadded] string | The base64 encoded signature of `REVOKE:${canonicalUcanCid}` | Yes      |
-
-Since revocations MAY be passed between systems, supporting the canonical JSON encoding is REQUIRED:
-
-``` js
-{
-  "iss": "did:key:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnEGta2doK",
-  "rev": "bafkreia7l6bthgtpaaw4qbfacun6p4rt5rcorsognxgojvkyvhlmo7kf4a",
-  "clg": "FJi1Rnpj3/otydngacrwddFvwz/dTDsBv62uZDN2fZM"
-}
-```
-
-This format makes it easy to select the relevant UCAN, confirm that the issuer is in the proof chain for some or all capabilities, and validate that the revocation was signed by the same issuer.
-
-Any other proofs in the selected UCAN not issued by the same DID as the revocation issuer MUST be treated as valid.
-
-Revocations MAY be deleted once the UCAN that they reference expires or otherwise becomes invalid via its proactive mechanisms.
-
-## 6.6.1 Example
+Revocations MUST be immutible and irreversible. If the revocation was issued in error, a new unique UCAN delegation MAY be issued (e.g. by updating the nonce or changing the time bounds). This prevents confusion as the revocation moves through the network and makes revocation stores append-only and highly amenable to caching.
 
 ``` mermaid
 flowchart TB
@@ -103,19 +78,42 @@ flowchart TB
 
 In this example, Alice MAY revoke any of the UCANs in the chain, Carol MAY revoke the bottom two, and so on. If the UCAN `Carol → Dan` is revoked by Alice, Bob, or Carol, then Erin will not have a valid chain for `X` since its proof is invalid. However, Erin can still prove the valid capability for `Y` and `Z` since the still-valid ("unbroken") chain `Alice → Bob → Dan → Erin` includes them. Note that despite `Y` being in the revoked `Carol → Dan` UCAN, it does not invalidate `Y` for Erin, since the unbroken chain also included a proof for `Y`. 
 
+# 3 Format
+
+A revocation message MUST contain the following information:
+
+| Field | Type                     | Description                                                  | Required |
+|-------|--------------------------|--------------------------------------------------------------|----------|
+| `iss` | [DID]                    | The DID of the revoker                                       | Yes      |
+| `rev` | [CID]                    | The [canonical CID] of the UCAN being revoked                | Yes      |
+| `clg` | [base64-unpadded] string | The base64 encoded signature of `REVOKE:${canonicalUcanCid}` | Yes      |
+
+Since revocations MAY be passed between systems, supporting the canonical JSON encoding is REQUIRED:
+
+``` js
+{
+  "iss": "did:key:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnEGta2doK",
+  "rev": "bafkreia7l6bthgtpaaw4qbfacun6p4rt5rcorsognxgojvkyvhlmo7kf4a",
+  "clg": "FJi1Rnpj3/otydngacrwddFvwz/dTDsBv62uZDN2fZM"
+}
+```
+
+# 4 Revocation Store
+
+The agent that controls a resource SHOULD maintain a cache of revocations that it's seen. Other agents MAY also maintain a cache of revocations that they're aware of.
+
+## 4.1 Eviction
+
+Revocations MAY be deleted once the UCAN that they reference expires or otherwise becomes invalid via its proactive mechanisms.
+
+A revocation store MOST only keep UCAN revocations for UCANs that are otherwise still valid. For example, expired UCANs are already invalid, so a revocation MUST NOT affect this invalid status. The revocation is thus redundant, and MAY be evicted from the store.
 
 
-[Alan Karp]: https://github.com/alanhkarp
-[Benjamin Goering]: https://github.com/gobengo
-[Biscuit]: https://github.com/biscuit-auth/biscuit/
-[Blaine Cook]: https://github.com/blaine
+
 [Bluesky]: https://blueskyweb.xyz/
-[Brendan O'Brien]: https://github.com/b5
-[Brian Ginsburg]: https://github.com/bgins
 [Brooklyn Zelenka]: https://github.com/expede 
-[CACAO]: https://blog.ceramic.network/capability-based-data-security-on-ceramic/
 [CIDv1]: https://docs.ipfs.io/concepts/content-addressing/#identifier-formats
-[Canonical CID]: #651-cid-canonicalization
+FIXME [Canonical CID]: #651-cid-canonicalization
 [Capability Myths Demolished]: https://srl.cs.jhu.edu/pubs/SRL2003-02.pdf
 [Christine Lemmer-Webber]: https://github.com/cwebber
 [Christopher Joel]: https://github.com/cdata
