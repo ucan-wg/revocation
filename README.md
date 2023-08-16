@@ -108,12 +108,12 @@ A revocation store MOST only keep UCAN revocations for UCANs that are otherwise 
 
 A revocation message MUST contain the following information:
 
-| Field | Type                     | Description                                                | Required |
-|-------|--------------------------|------------------------------------------------------------|----------|
-| `urv` | [Semver] string          | Version of UCAN Revocation (`1.0.0-rc.1`)                  | Yes      |
-| `iss` | [DID]                    | Revoker DID                                                | Yes      |
-| `rvk` | [CIDv1]                  | The [canonical CID] of the UCAN being revoked              | Yes      |
-| `sig` | [base64-unpadded] string | The base64 encoded signature of `` `REVOKE-UCAN:${rvk}` `` | Yes      |
+| Field | Type                               | Description                                                | Required |
+|-------|------------------------------------|------------------------------------------------------------|----------|
+| `urv` | [Semver] string                    | Version of UCAN Revocation (`1.0.0-rc.1`)                  | Yes      |
+| `iss` | [DID]                              | Revoker DID                                                | Yes      |
+| `rvk` | [CIDv1]                            | The [canonical CID] of the UCAN being revoked              | Yes      |
+| `sig` | [base64-unpadded][RFC 4648] string | The base64 encoded signature of `` `REVOKE-UCAN:${rvk}` `` | Yes      |
 
 Revocations MAY be gossiped between systems. As such, they need to be parsable by a wide number of lanaguges and contexts. To accomodate this, compliant UCAN revocations MUST be JSON-encoded.
 
@@ -208,10 +208,12 @@ We want to especially recognize [Mark Miller] for his numerous contributions to 
 [POLA]: https://en.wikipedia.org/wiki/Principle_of_least_privilege
 [Philipp Krüger]: https://github.com/matheus23
 [Protocol Labs]: https://protocol.ai/
+[RFC 4648]: https://www.rfc-editor.org/rfc/rfc4648.html
 [RFC 5280]: https://www.rfc-editor.org/rfc/rfc5280
 [RFC 7009]: https://datatracker.ietf.org/doc/html/rfc7009
 [Robust Composition]: https://jscholarship.library.jhu.edu/bitstream/handle/1774.2/873/markm-thesis.pdf?page=100
 [SPKI/SDSI]: https://datatracker.ietf.org/wg/spki/about/
+[Semver]: https://semver.org/
 [VC Revocation]: https://w3c-ccg.github.io/vc-status-rl-2020/
 [W3C]: https://www.w3.org/
 [ZCAP-LD]: https://w3c-ccg.github.io/zcap-spec/
