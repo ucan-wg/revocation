@@ -8,6 +8,7 @@ Aud
 Auth
 AuthorityA
 AuthorityB
+BCP
 BT
 Bluesky
 BxZ
@@ -73,6 +74,7 @@ URI
 URIs
 UTF
 Vandevelde
+Verfiable
 WG
 WebNative
 Webber
@@ -92,6 +94,7 @@ crudGraph
 cryptographically
 del
 delegable
+delegatee
 delegator
 dereference
 disambiguates
@@ -127,15 +130,18 @@ naud
 ncap
 niss
 nota
+parsable
 plaintext
 potencies
 pre
 preimages
 quG
+rc
 reauthorizations
 recommentations
 redelegate
 redelegates
+revoker
 revoker's
 rootAud
 rootCap
@@ -154,6 +160,7 @@ trustlessly
 ucan
 un
 unary
+unpadded
 unresolvable
 url
 validatable
