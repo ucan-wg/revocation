@@ -1,4 +1,4 @@
-# UCAN Revocation Specification v1.0.0-RC
+# UCAN Revocation Specification 1.0.0-RC.1
 
 ## Editors
 
@@ -6,8 +6,10 @@
 
 ## Authors
 
-* [Daniel Holmgren], [Bluesky]
 * [Brooklyn Zelenka], [Fission]
+* [Daniel Holmgren], [Bluesky]
+* [Irakli Gozalishvili], [Protocol Labs]
+* [Philipp Krüger], [Fission]
 
 ## Language
 
@@ -95,9 +97,9 @@ Since revocations MAY be passed between systems, supporting the canonical JSON e
 }
 ```
 
-# 4 Revocation Store
+# 4 Cache
 
-The agent that controls a resource SHOULD maintain a cache of revocations that it's seen. Other agents MAY also maintain a cache of revocations that they're aware of. On recept of a UCAN delegation or invocation, the 
+The agent that controls a resource SHOULD maintain a cache of revocations that it has seen. Other agents MAY also maintain a cache of revocations that they're aware of. On recept of a UCAN delegation or invocation, the 
 
 ## 4.1 Eviction
 
