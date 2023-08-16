@@ -110,7 +110,7 @@ A revocation message MUST contain the following fields:
 |-------|--------------------------|------------------------------------------------------------|----------|
 | `urv` | [Semver] string          | Version of UCAN Revocation (`1.0.0-rc.1`)                  | Yes      |
 | `iss` | [DID]                    | Revoker DID                                                | Yes      |
-| `rvk` | [CID]                    | The [canonical CID] of the UCAN being revoked              | Yes      |
+| `rvk` | [CIDv1]                  | The [canonical CID] of the UCAN being revoked              | Yes      |
 | `sig` | [base64-unpadded] string | The base64 encoded signature of `` `REVOKE-UCAN:${rvk}` `` | Yes      |
 
 Revocations MAY be gossiped between systems. As such, they need to be parsable by a wide number of lanaguges and contexts. To accomodate this, compliant UCAN revocations MUST be JSON-encoded.
@@ -131,7 +131,7 @@ Note that this revocation MUST only revoke the particular capabilities from the 
 
 ## 4.4 `sig` Prefixed Signature
 
-The `sig` field MUST contain a signature that validates against the revoker's DID. The format to sign over MUST be prefixed with the UTF-8 string `REVOKE-UCAN:`, followed by the CID from the `rvk` field.
+The `sig` field MUST contain a signature that validates against the revoker's DID. The format to sign over MUST be prefixed with the UTF-8 string `REVOKE-UCAN:`, followed by the CID from the `rvk` field. Note that the prefix contains no spaces.
 
 ## 4.5 Example
 
@@ -146,22 +146,54 @@ The `sig` field MUST contain a signature that validates against the revoker's DI
 
 # 5 Prior Art
 
-SPKI/SDSI recovcation lists
+[SPKI/SDSI] is closely related to UCAN. A different format is used, and some details vary (such as a delegation-locking bit), but the core idea and general usage pattern are very close. UCAN can be seen as making these ideas more palatable to a modern audience and adding a few features such as content IDs that were less widespread at the time SPKI/SDSI were written.
+
+[ZCAP-LD] is closely related to UCAN. The primary differences are in formatting, addressing by URL instead of CID, the mechanism of separating invocation from authorization, and single versus multiple proofs.
+
+[OAuth 2.0 Revocation][RFC 7009]
+
+
+Verfiable crednetial revocations 
+
 
 # 6 Acknowledgements
 
+Thank you [Blaine Cook] for the real-world feedback, ideas on future features, and lessons from other auth standards.
 
+Thanks to [Juan Caballero] for the numerous questions, clarifications, and general advice on putting together a comprehensible spec.
 
+Many thanks to [Alan Karp] for sharing his vast experience with capability-based authorization, patterns, and many right words for us to search for.
 
+Thanks to [Benjamin Goering] for the many community threads and connections to [W3C] standards.
 
+Many thanks to [Christine Lemmer-Webber] for her handwritten(!) feedback on the design of UCAN, spearheading the [OCapN] initiative, and her related work on [ZCAP-LD].
+
+Thanks to the entire [SPKI WG][SPKI/SDSI] for their closely related pioneering work.
+
+We want to especially recognize [Mark Miller] for his numerous contributions to the field of distributed auth, programming languages, and computer security writ large.
+
+<!-- Internal Links -->
 
 
 
 <!-- External Links -->
 
+[Alan Karp]: https://github.com/alanhkarp
 [BCP 14]: https://www.rfc-editor.org/info/bcp14
 [Bluesky]: https://blueskyweb.xyz/
 [Brooklyn Zelenka]: https://github.com/expede 
 [CIDv1]: https://docs.ipfs.io/concepts/content-addressing/#identifier-formats
-
-<!-- Internal Links -->
+[Christine Lemmer-Webber]: https://github.com/cwebber
+[DID]: https://www.w3.org/TR/did-core/
+[Daniel Holmgren]: https://github.com/dholms
+[Fission]: https://fission.codes
+[Irakli Gozalishvili]: https://github.com/Gozala
+[Mark Miller]: https://github.com/erights
+[OCAP]: http://erights.org/elib/capability/index.html
+[OCapN]: https://github.com/ocapn/ocapn
+[POLA]: https://en.wikipedia.org/wiki/Principle_of_least_privilege
+[Protocol Labs]: https://protocol.ai/
+[RFC 7009]: https://datatracker.ietf.org/doc/html/rfc7009
+[SPKI/SDSI]: https://datatracker.ietf.org/wg/spki/about/
+[VC Revocations]: https://w3c-ccg.github.io/vc-status-rl-2020/
+[ZCAP-LD]: https://w3c-ccg.github.io/zcap-spec/
