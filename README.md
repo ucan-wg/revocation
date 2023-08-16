@@ -84,7 +84,7 @@ These weak assumptions are often associated with being unable to guarantee deliv
 
 Out of order delivery is typical of distributed systems. Further, a mallicious user can otherwise delay revealing that they have a capability until the last possible moment in hopes of evading detection. Accepting revocations for resources that the agent controls prior to the delegation targeted by the revocaton is recieved is thus RECOMMENDED. 
 
-# 3 Cache
+# 3 Store
 
 The agent that controls a resource SHOULD maintain a cache of revocations that it has seen. Agents are not limited to only storing revocations for resources that they control.
 
@@ -148,7 +148,7 @@ The `sig` field MUST contain a signature that validates against the revoker's DI
 
 # 5 Prior Art
 
-[Revocation lists][Cert Revocation Wikipedia] are a well 
+[Revocation lists][Cert Revocation Wikipedia] are a fairly widely used concept.
 
 [SPKI/SDSI] is closely related to UCAN. A different format is used, and some details vary (such as a delegation-locking bit), but the core idea and general usage pattern are very close. UCAN can be seen as making these ideas more palatable to a modern audience and adding a few features such as content IDs that were less widespread at the time SPKI/SDSI were written.
 
@@ -158,11 +158,9 @@ The `sig` field MUST contain a signature that validates against the revoker's DI
 
 [OAuth 2.0 Revocation][RFC 7009] is very similar to UCAN revocation. It is largely concerned with the HTTP interactions to make OAuth revocation work. OAuth doesn't have a concept of subdelegation, so only the user that has been granted the token can revoke it. However, this may cascade to revocation of other tokens, but the exact mechanism is left to the implementer.
 
+While strctly speaking being about assertions rather than capabilities, [Verfiable Credential Revocation][VC Revocation] spec follows a similar pattern to those listed above.
 
-The [Verfiable Credential Revocation][VC Revocation] spec follows a similar
-
-
-[Object capabilities] use active nework connections to revoke delegations. This is typically achieved by delegating access to a proxy agent, and later shutting down that proxy to break the authority. In many ways, UCAN Revocation attempts to emulate this behaviour. Unlike UCAN REvocations, E-style object capabilities are [fail-stop] and thus by defnition not partition tolerant.
+[E][E-lang]-style [object capabilities][Robust Composition] use active nework connections with [proxy agents][Robust Composition] to revoke delegations. Revocation is achoeved by shutting down that proxy to break the authorizing reference. In many ways, UCAN Revocation attempts to emulate this behaviour. Unlike UCAN REvocations, E-style object capabilities are [fail-stop] and thus by defnition not partition tolerant.
 
 # 6 Acknowledgements
 
@@ -182,30 +180,42 @@ We want to especially recognize [Mark Miller] for his numerous contributions to 
 
 <!-- Internal Links -->
 
-
+[revocation stores]: #3-store
 
 <!-- External Links -->
 
+[ACL]: https://en.wikipedia.org/wiki/Access-control_list
 [Alan Karp]: https://github.com/alanhkarp
 [BCP 14]: https://www.rfc-editor.org/info/bcp14
+[Benjamin Goering]: https://github.com/gobengo
 [Blaine Cook]: https://github.com/blaine
 [Bluesky]: https://blueskyweb.xyz/
 [Brooklyn Zelenka]: https://github.com/expede 
 [CIDv1]: https://docs.ipfs.io/concepts/content-addressing/#identifier-formats
+[CRDT]: https://en.wikipedia.org/wiki/Conflict-free_replicated_data_type
 [Cert Revocation Wikipedia]: https://en.wikipedia.org/wiki/Certificate_revocation_list
 [Christine Lemmer-Webber]: https://github.com/cwebber
 [DID]: https://www.w3.org/TR/did-core/
 [Daniel Holmgren]: https://github.com/dholms
+[E-lang]: http://erights.org/elang/
 [Fission]: https://fission.codes
+[Git]: https://git-scm.com/
 [Irakli Gozalishvili]: https://github.com/Gozala
 [Juan Caballero]: https://github.com/bumblefudge
 [Mark Miller]: https://github.com/erights
 [OCAP]: http://erights.org/elib/capability/index.html
 [OCapN]: https://github.com/ocapn/ocapn
 [POLA]: https://en.wikipedia.org/wiki/Principle_of_least_privilege
+[Philipp Krüger]: https://github.com/matheus23
 [Protocol Labs]: https://protocol.ai/
 [RFC 5280]: https://www.rfc-editor.org/rfc/rfc5280
 [RFC 7009]: https://datatracker.ietf.org/doc/html/rfc7009
+[Robust Composition]: https://jscholarship.library.jhu.edu/bitstream/handle/1774.2/873/markm-thesis.pdf?page=100
 [SPKI/SDSI]: https://datatracker.ietf.org/wg/spki/about/
 [VC Revocation]: https://w3c-ccg.github.io/vc-status-rl-2020/
+[W3C]: https://www.w3.org/
 [ZCAP-LD]: https://w3c-ccg.github.io/zcap-spec/
+[blocklists]: https://en.wikipedia.org/w/index.php?title=Block_list&redirect=no
+[canonical CID]: https://github.com/ucan-wg/spec/blob/d5a844cceff569838881c7fa30ff4bfad338e771/README.md?plain=1#L800-L807
+[fail-stop]: https://en.wikipedia.org/wiki/Fail-stop
+[local-first]: https://www.inkandswitch.com/local-first/
