@@ -82,6 +82,8 @@ Weak assumptions enable UCAN to work with eventually consistent resources, such 
 
 These weak assumptions are often associated with being unable to guarantee delivery in a certain time bound. Weak assumptions can always be strengthened, but not vice-versa. For example, if a capability describes access to a resource with a single location or souce of truth, sending a revocation to that specific agent enables confirmatation in bounded time. This grants nearly idential semantics that many people turn to [ACL]s for, but with all of the benefits of capabilties during delegation and invocation.
 
+Out of order delivery is typical of distributed systems. Further, a mallicious user can otherwise delay revealing that they have a capability until the last possible moment in hopes of evading detection. Accepting revocations for resources that the agent controls prior to the delegation targeted by the revocaton is recieved is thus RECOMMENDED. 
+
 # 3 Cache
 
 The agent that controls a resource SHOULD maintain a cache of revocations that it has seen. Agents are not limited to only storing revocations for resources that they control.
@@ -104,7 +106,7 @@ A revocation store MOST only keep UCAN revocations for UCANs that are otherwise 
 
 # 4 Format
 
-A revocation message MUST contain the following fields:
+A revocation message MUST contain the following information:
 
 | Field | Type                     | Description                                                | Required |
 |-------|--------------------------|------------------------------------------------------------|----------|
@@ -146,15 +148,21 @@ The `sig` field MUST contain a signature that validates against the revoker's DI
 
 # 5 Prior Art
 
+[Revocation lists][Cert Revocation Wikipedia] are a well 
+
 [SPKI/SDSI] is closely related to UCAN. A different format is used, and some details vary (such as a delegation-locking bit), but the core idea and general usage pattern are very close. UCAN can be seen as making these ideas more palatable to a modern audience and adding a few features such as content IDs that were less widespread at the time SPKI/SDSI were written.
 
-[ZCAP-LD] is closely related to UCAN. The primary differences are in formatting, addressing by URL instead of CID, the mechanism of separating invocation from authorization, and single versus multiple proofs.
+[X.509 Certificate Revocation Lists][RFC 5280] defines two kinds of certificate invalidaton: temporary ("hold") and permanent ("revocation"). This RFC also includes a field for indicating a reason for revocation. UCAN Revocation has no concept of a temporary hold on a capabilty, but this behaviour MAY be emulated by revoking a credential and issuing a new UCAN with a `nbf` field set to a time in the future.
 
-[OAuth 2.0 Revocation][RFC 7009]
+[ZCAP-LD] is closely related to UCAN, but situated in the W3C-style linked data world (the "LD" in ZCAP-LD). Revocation in ZCAP-LD is only granted to those who have a special caveat on a capabilty. In contrast, UCAN capabilties MAY be revoked by anyone in the relevant deleagtion path.
+
+[OAuth 2.0 Revocation][RFC 7009] is very similar to UCAN revocation. It is largely concerned with the HTTP interactions to make OAuth revocation work. OAuth doesn't have a concept of subdelegation, so only the user that has been granted the token can revoke it. However, this may cascade to revocation of other tokens, but the exact mechanism is left to the implementer.
 
 
-Verfiable crednetial revocations 
+The [Verfiable Credential Revocation][VC Revocation] spec follows a similar
 
+
+[Object capabilities] use active nework connections to revoke delegations. This is typically achieved by delegating access to a proxy agent, and later shutting down that proxy to break the authority. In many ways, UCAN Revocation attempts to emulate this behaviour. Unlike UCAN REvocations, E-style object capabilities are [fail-stop] and thus by defnition not partition tolerant.
 
 # 6 Acknowledgements
 
@@ -180,20 +188,24 @@ We want to especially recognize [Mark Miller] for his numerous contributions to 
 
 [Alan Karp]: https://github.com/alanhkarp
 [BCP 14]: https://www.rfc-editor.org/info/bcp14
+[Blaine Cook]: https://github.com/blaine
 [Bluesky]: https://blueskyweb.xyz/
 [Brooklyn Zelenka]: https://github.com/expede 
 [CIDv1]: https://docs.ipfs.io/concepts/content-addressing/#identifier-formats
+[Cert Revocation Wikipedia]: https://en.wikipedia.org/wiki/Certificate_revocation_list
 [Christine Lemmer-Webber]: https://github.com/cwebber
 [DID]: https://www.w3.org/TR/did-core/
 [Daniel Holmgren]: https://github.com/dholms
 [Fission]: https://fission.codes
 [Irakli Gozalishvili]: https://github.com/Gozala
+[Juan Caballero]: https://github.com/bumblefudge
 [Mark Miller]: https://github.com/erights
 [OCAP]: http://erights.org/elib/capability/index.html
 [OCapN]: https://github.com/ocapn/ocapn
 [POLA]: https://en.wikipedia.org/wiki/Principle_of_least_privilege
 [Protocol Labs]: https://protocol.ai/
+[RFC 5280]: https://www.rfc-editor.org/rfc/rfc5280
 [RFC 7009]: https://datatracker.ietf.org/doc/html/rfc7009
 [SPKI/SDSI]: https://datatracker.ietf.org/wg/spki/about/
-[VC Revocations]: https://w3c-ccg.github.io/vc-status-rl-2020/
+[VC Revocation]: https://w3c-ccg.github.io/vc-status-rl-2020/
 [ZCAP-LD]: https://w3c-ccg.github.io/zcap-spec/
