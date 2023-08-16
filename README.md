@@ -35,20 +35,19 @@ UCAN revocation is accomplished with an eventually consistent message. Note that
 
 # 2 Semantics
 
-- Invidates proofs, but can still be valid because constructive
-- [ ] 
-
-
-
 UCAN revocation is the act of invalidating a proof in a delegation chain for some specific UCAN delegation by its CID. All UCAN capabilities are either claimed by direct authority over the resource, or by delegation chain terminating in that direct ("root") authority. Each link in a delegation chain contains an explicit issuer (delegator) and audience (delegatee).
-
-An issuer of a proof in a delegation chain MAY revoke access to the capabilties that it granted. Note that this is not the same as revoking the specific delegation signed by the issuer: any UCAN that contains a proof where the revoker matches the `iss` field — even transatively in the delegation chain — MAY be revoked.
 
 Revocations MUST be immutible and irreversible. If the revocation was issued in error, a new unique UCAN delegation MAY be issued (e.g. by updating the nonce or changing the time bounds). This prevents confusion as the revocation moves through the network and makes revocation stores append-only and highly amenable to caching.
 
+## 2.1 Scope 
+
+An issuer of a proof in a delegation chain MAY revoke access to the capabilties that it granted. Note that this is not the same as revoking the specific delegation signed by the issuer: any UCAN that contains a proof where the revoker matches the `iss` field — even transatively in the delegation chain — MAY be revoked.
+
 Revocation by a particular proof does not guarantee that the principle no longer has access to the capabilty in question. If a principal is able to construct a valid proof chain without relying on the revoked proof, they still have access to the capability. By real-world analogy, if Mallory has two tickets to a film, and one of them is invalidated by its serial number, she is still able to present the valid ticket to see the film.
 
-## 2.1 Revocation Scope Example
+### 2.1.1 Example
+
+<figure>
 
 ``` mermaid
 flowchart TB
@@ -76,11 +75,11 @@ flowchart TB
     DE -->|proof| BD
 ```
 
+  <figcaption>Figure 1 — Revocation scope example</figcaption>
+</figure>
+
+
 Here Alice is the root issuer. She MAY revoke any of the UCANs in the chain, Carol MAY revoke the two innermost, and so on. If the UCAN `Carol to Dan` is revoked by Alice, Bob, or Carol, then Erin will not have a valid chain for the `X` capability, since its only proof is invalid. However, Erin can still prove the valid capability for `Y` and `Z` since the still-valid ("unbroken") chain `Alice to Bob to Dan to Erin` includes them. Note that despite `Y` being in the revoked `Carol to Dan` UCAN, it does not invalidate `Y` for Erin, since the unbroken chain also included a proof for `Y`. 
-
-
-
-
 
 ## 2.2 Consistency Models
 
@@ -118,24 +117,38 @@ A revocation store MOST only keep UCAN revocations for UCANs that are otherwise 
 
 # 4 Format
 
-A revocation message MUST contain the following information:
+A revocation message MUST contain the following fields:
 
 | Field | Type                     | Description                                           | Required |
 |-------|--------------------------|-------------------------------------------------------|----------|
-| `ucv` | [Semver] string          | Version of UCAN Revocation (`1.0.0-rc.1`)             | Yes      |
+| `urv` | [Semver] string          | Version of UCAN Revocation (`1.0.0-rc.1`)             | Yes      |
 | `iss` | [DID]                    | Revoker DID                                           | Yes      |
 | `rvk` | [CID]                    | The [canonical CID] of the UCAN being revoked         | Yes      |
 | `sig` | [base64-unpadded] string | The base64 encoded signature of `` `REVOKE:${rvk}` `` | Yes      |
 
 Note that the revoker DID is not listed directly, since it can be inferred by inspecting the UCAN delagation being revoked.
 
-## 4.1 Canonicalization
+Revocations MAY be gossiped between systems. As such, they need to be parsable by a wide number of lanaguges and contexts. To accomodate this, compliant UCAN revocations MUST be JSON-encoded.
 
-As revocations MAY be gossiped between systems, revocations MUST be encoded canconically as JSON.
+## 4.1 `urv` Version
+
+The UCAN Revocation Version, i.e. the version of this document: `1.0.0-rc.1`.
+
+## 4.2 `iss` Issuer
+
+The issuer DID of this revocation. This DID MUST match one or more `iss` fields in the proof chain of the UCAN listed in the `rvk` field. This DID MUST also validate against the signature in the `sig` field.
+
+## 4.3 `rvk` Revoker
+
+The `rvk` field 
+
+## 4.4 `sig` Signature
+
+## 4.5 Example
 
 ``` json
 {
-  "ucv": "1.0.0-rc.1",
+  "urv": "1.0.0-rc.1",
   "iss": "did:key:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnEGta2doK",
   "rvk": "bafkreia7l6bthgtpaaw4qbfacun6p4rt5rcorsognxgojvkyvhlmo7kf4a",
   "sig": "FJi1Rnpj3/otydngacrwddFvwz/dTDsBv62uZDN2fZM"
