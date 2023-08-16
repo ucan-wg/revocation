@@ -37,17 +37,14 @@ UCAN revocation is accomplished with an eventually consistent message. Note that
 
 - Invidates proofs, but can still be valid because constructive
 - [ ] 
-Any issuer of a UCAN MAY later revoke that UCAN or the capabilities that have been derived from it further downstream in a proof chain.
 
-This mechanism is eventually consistent and SHOULD be considered the last line of defense against abuse. Proactive expiry via time bounds or other constraints SHOULD be preferred, as they do not require learning more information than what would be available on an offline computer.
 
-While some resources are centralized (e.g. access to a server), others are unbound from specific locations (e.g. a CRDT), in which case it will take longer for the revocation to propagate.
 
-Every resource type SHOULD have a canonical location where its revocations are kept. This list is non-exclusive, and revocation messages MAY be gossiped between peers in a network to share this information more quickly.
+UCAN capability revocation is the act of invalidating a proof in a delegation chain for some specific UCAN delegation by its CID.
 
-It is RECOMMENDED that the canonical revocation store be kept as close to (or inside) the resource it is about as possible. For example, the WebNative File System maintains a Merkle tree of revoked CIDs at a well-known path. Another example is that a centralized server could have an endpoint that lists the revoked UCANs by [canonical CID].
+All UCAN capabilities are either claimed by direct authority over the resource, or by delegation chain terminating in that direct ("root") authority. Each link in a delegation chain contains an explicit issuer (delegator) and audience (delegatee). Any issuer in a proof chain MAY revoke access to the capabilties that it delegated anywhere in a proof chain. Note that this is not the same as revoking the specific delegation signed by the issuer: any UCAN that contains the issuer transatively in the delegation chain MAY be revoked.
 
-Revocations MUST be immutible and irreversible. If the revocation was issued in error, a new unique UCAN delegation MAY be issued (e.g. by updating the nonce or changing the time bounds). This prevents confusion as the revocation moves through the network and makes revocation stores append-only and highly amenable to caching.
+As a concrete example:
 
 ``` mermaid
 flowchart TB
@@ -75,7 +72,36 @@ flowchart TB
     DE -->|proof| BD
 ```
 
-In this example, Alice MAY revoke any of the UCANs in the chain, Carol MAY revoke the bottom two, and so on. If the UCAN `Carol → Dan` is revoked by Alice, Bob, or Carol, then Erin will not have a valid chain for `X` since its proof is invalid. However, Erin can still prove the valid capability for `Y` and `Z` since the still-valid ("unbroken") chain `Alice → Bob → Dan → Erin` includes them. Note that despite `Y` being in the revoked `Carol → Dan` UCAN, it does not invalidate `Y` for Erin, since the unbroken chain also included a proof for `Y`. 
+Here Alice is the root issuer. She MAY revoke any of the UCANs in the chain, Carol MAY revoke the two innermost, and so on. If the UCAN `Carol to Dan` is revoked by Alice, Bob, or Carol, then Erin will not have a valid chain for the `X` capability, since its only proof is invalid. However, Erin can still prove the valid capability for `Y` and `Z` since the still-valid ("unbroken") chain `Alice to Bob to Dan to Erin` includes them. Note that despite `Y` being in the revoked `Carol to Dan` UCAN, it does not invalidate `Y` for Erin, since the unbroken chain also included a proof for `Y`. 
+
+
+
+Revocations MUST be immutible and irreversible. If the revocation was issued in error, a new unique UCAN delegation MAY be issued (e.g. by updating the nonce or changing the time bounds). This prevents confusion as the revocation moves through the network and makes revocation stores append-only and highly amenable to caching.
+
+## Multiple Paths
+
+Revocation by a particular proof does not guarantee that the principle no longer has access to the capabilty in question. If a principal is able to construct a valid proof chain without relying on the revoked proof, they still have access to the capability. By real-world analogy, if Mallory has two tickets to a film, and one of them is invalidated by its serial number, she is still able to present the valid ticket to see the film.
+
+
+
+
+
+
+## Consistency Models
+
+
+### Eventual Consistency
+
+This mechanism is eventually consistent and SHOULD be considered the last line of defense against abuse. Proactive expiry via time bounds or other constraints SHOULD be preferred, as they do not require learning more information than what would be available on an offline computer.
+
+### Direct Revocation
+
+While some resources are centralized (e.g. access to a server), others are unbound from specific locations (e.g. a CRDT), in which case it will take longer for the revocation to propagate.
+
+Every resource type SHOULD have a canonical location where its revocations are kept. This list is non-exclusive, and revocation messages MAY be gossiped between peers in a network to share this information more quickly.
+
+
+
 
 # 3 Format
 
@@ -100,6 +126,13 @@ Since revocations MAY be passed between systems, supporting the canonical JSON e
 # 4 Cache
 
 The agent that controls a resource SHOULD maintain a cache of revocations that it has seen. Other agents MAY also maintain a cache of revocations that they're aware of. On recept of a UCAN delegation or invocation, the 
+
+
+
+
+
+It is RECOMMENDED that the canonical revocation store be kept as close to (or inside) the resource it is about as possible. For example, the WebNative File System maintains a Merkle tree of revoked CIDs at a well-known path. Another example is that a centralized server could have an endpoint that lists the revoked UCANs by [canonical CID].
+
 
 ## 4.1 Eviction
 
