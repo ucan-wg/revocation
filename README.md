@@ -27,11 +27,9 @@ Using the [principle of least authprity][POLA] such as certificate expiry and re
 
 Even when not in error at time of issuance, the trust relationship between a delegator and delegatee is not immutible. An agent can go rogue, keys can be compromised, and the privacy requirements of resources changed. While the UCAN delegation approach RECOMMENDS using the [principle of least authority][POLA], such unexpected conditions can and do arise. These are exceptional cases, but are sufficiently important that a well defined method for performing revocation is nearly always desired. Revocation is the act of invalidating a UCAN after the fact, outside of the limitations placed on it by the UCAN's fields (such as its expiry). 
 
-## 1.1 Approach
+## 1.2 Approach
 
-UCAN delegation is designed to be [local-first]. As such, [fail-stop] approaches are not suitable.
-
-UCAN revocation is accomplished with an eventually consistent message. Note that the delivery tradeoff often associated with eventually consistent systems only apply in the worst case: it is entirely possible to communicate directly with the resource server when there is a single source of truth. The extra generality of eventual consistency allows UCAN revocations to be compatible with the weaker assumptions in resources such as [CRDT]s, when communicating over gossip channels, and at the edge.
+UCAN delegation is designed to be [local-first]. As such, [fail-stop] approaches are not suitable. Revocation is accomplished via an unforgable message 
 
 # 2 Semantics
 
@@ -46,8 +44,6 @@ An issuer of a proof in a delegation chain MAY revoke access to the capabilties 
 Revocation by a particular proof does not guarantee that the principle no longer has access to the capabilty in question. If a principal is able to construct a valid proof chain without relying on the revoked proof, they still have access to the capability. By real-world analogy, if Mallory has two tickets to a film, and one of them is invalidated by its serial number, she is still able to present the valid ticket to see the film.
 
 ### 2.1.1 Example
-
-<figure>
 
 ``` mermaid
 flowchart TB
@@ -75,11 +71,7 @@ flowchart TB
     DE -->|proof| BD
 ```
 
-  <figcaption>Figure 1 — Revocation scope example</figcaption>
-</figure>
-
-
-Here Alice is the root issuer. She MAY revoke any of the UCANs in the chain, Carol MAY revoke the two innermost, and so on. If the UCAN `Carol to Dan` is revoked by Alice, Bob, or Carol, then Erin will not have a valid chain for the `X` capability, since its only proof is invalid. However, Erin can still prove the valid capability for `Y` and `Z` since the still-valid ("unbroken") chain `Alice to Bob to Dan to Erin` includes them. Note that despite `Y` being in the revoked `Carol to Dan` UCAN, it does not invalidate `Y` for Erin, since the unbroken chain also included a proof for `Y`. 
+Here Alice is the root issuer / resource owner. Alice MAY revoke any of the UCANs in the chain, Carol MAY revoke the two innermost, and so on. If the UCAN `Carol to Dan` is revoked by Alice, Bob, or Carol, then Erin will not have a valid chain for the `X` capability, since its only proof is invalid. However, Erin can still prove the valid capability for `Y` and `Z` since the still-valid ("unbroken") chain `Alice to Bob to Dan to Erin` includes them. Note that despite `Y` being in the revoked `Carol to Dan` UCAN, it does not invalidate `Y` for Erin, since the unbroken chain also included a proof for `Y`. 
 
 ## 2.2 Consistency Models
 
@@ -87,6 +79,8 @@ Here Alice is the root issuer. She MAY revoke any of the UCANs in the chain, Car
 ### 2.2.1 Eventual Consistency
 
 This mechanism is eventually consistent and SHOULD be considered the last line of defense against abuse. Proactive expiry via time bounds or other constraints SHOULD be preferred, as they do not require learning more information than what would be available on an offline computer.
+
+Note that the delivery tradeoff often associated with eventually consistent systems only apply in the worst case: it is entirely possible to communicate directly with the resource server when there is a single source of truth. The extra generality of eventual consistency allows UCAN revocations to be compatible with the weaker assumptions in resources such as [CRDT]s, when communicating over gossip channels, and at the edge.
 
 ### 2.2.2 Direct Revocation
 
@@ -119,30 +113,32 @@ A revocation store MOST only keep UCAN revocations for UCANs that are otherwise 
 
 A revocation message MUST contain the following fields:
 
-| Field | Type                     | Description                                           | Required |
-|-------|--------------------------|-------------------------------------------------------|----------|
-| `urv` | [Semver] string          | Version of UCAN Revocation (`1.0.0-rc.1`)             | Yes      |
-| `iss` | [DID]                    | Revoker DID                                           | Yes      |
-| `rvk` | [CID]                    | The [canonical CID] of the UCAN being revoked         | Yes      |
-| `sig` | [base64-unpadded] string | The base64 encoded signature of `` `REVOKE:${rvk}` `` | Yes      |
-
-Note that the revoker DID is not listed directly, since it can be inferred by inspecting the UCAN delagation being revoked.
+| Field | Type                     | Description                                                | Required |
+|-------|--------------------------|------------------------------------------------------------|----------|
+| `urv` | [Semver] string          | Version of UCAN Revocation (`1.0.0-rc.1`)                  | Yes      |
+| `iss` | [DID]                    | Revoker DID                                                | Yes      |
+| `rvk` | [CID]                    | The [canonical CID] of the UCAN being revoked              | Yes      |
+| `sig` | [base64-unpadded] string | The base64 encoded signature of `` `REVOKE-UCAN:${rvk}` `` | Yes      |
 
 Revocations MAY be gossiped between systems. As such, they need to be parsable by a wide number of lanaguges and contexts. To accomodate this, compliant UCAN revocations MUST be JSON-encoded.
 
-## 4.1 `urv` Version
+## 4.1 `urv` UCAN Revocation Version
 
 The UCAN Revocation Version, i.e. the version of this document: `1.0.0-rc.1`.
 
-## 4.2 `iss` Issuer
+## 4.2 `iss` Revocation Issuer
 
 The issuer DID of this revocation. This DID MUST match one or more `iss` fields in the proof chain of the UCAN listed in the `rvk` field. This DID MUST also validate against the signature in the `sig` field.
 
-## 4.3 `rvk` Revoker
+## 4.3 `rvk` Revoked UCAN
 
-The `rvk` field 
+The `rvk` field MUST contain the [canonical CID] for the UCAN delegation being revoked. The target UCAN MUST contain a (potentially nested) UCAN proof where the `iss` field matches the `iss` field of this revocation. 
 
-## 4.4 `sig` Signature
+Note that this revocation MUST only revoke the particular capabilities from the relevant proof(s). The resultant proof chain MUST be treated as if that proof were not present, with no other changes.
+
+## 4.4 `sig` Prefixed Signature
+
+The `sig` field MUST contain a signature that validates against the revoker's DID. The format to sign over MUST be prefixed with the UTF-8 string `REVOKE-UCAN:`, followed by the CID from the `rvk` field.
 
 ## 4.5 Example
 
