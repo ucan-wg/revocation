@@ -29,7 +29,7 @@ Even when not in error at time of issuance, the trust relationship between a del
 
 ## 1.2 Approach
 
-UCAN Revocations are similar to [block lists]: they identify delegations that are retracted and no longer suitable for use. Revocation SHOULD be considered the last line of defense against abuse. Proactive expiry via time bounds or other constraints SHOULD be preferred, as they do not require learning more information than what would be available on an offline computer.
+UCAN Revocations are similar to [block lists]: they identify delegations that are retracted and no longer suitable for use. Revocation SHOULD be considered the last line of defense against abuse. Proactive expiry through time bounds or other constraints SHOULD be preferred, as they do not require learning more information than what would be available on an offline computer.
 
 UCAN delegation is designed to be [local-first]. As such, [fail-stop] approaches are not suitable. Revocation is accomplished by delivery of an unforgeable message from a previous delegator.
 
@@ -102,7 +102,7 @@ For eventually consistent data structures, this MAY be achieved by including the
 
 Revocations MAY be deleted once the UCAN that they reference expires or otherwise becomes invalid through its proactive mechanisms.
 
-A revocation store MOST only keep UCAN revocations for UCANs that are otherwise still valid. For example, expired UCANs are already invalid, so a revocation MUST NOT affect this invalid status. The revocation is thus redundant, and MAY be evicted from the store.
+A revocation store MUST keep UCAN revocations for UCANs that are otherwise still valid. For example, expired UCANs are already invalid, so a revocation MUST NOT affect this invalid status. Such revocations are redundant, and MAY be evicted from the store.
 
 # 4 Format
 
