@@ -37,6 +37,18 @@ UCAN revocation is the act of invalidating a proof in a delegation chain for som
 
 Revocations MUST be immutible and irreversible. If the revocation was issued in error, a new unique UCAN delegation MAY be issued (e.g. by updating the nonce or changing the time bounds). This prevents confusion as the revocation moves through the network and makes revocation stores append-only and highly amenable to caching.
 
+
+
+
+
+
+
+passing and SHOULD be considered the last line of defense against abuse. Proactive expiry via time bounds or other constraints SHOULD be preferred, as they do not require learning more information than what would be available on an offline computer.
+
+
+
+
+
 ## 2.1 Scope 
 
 An issuer of a proof in a delegation chain MAY revoke access to the capabilties that it granted. Note that this is not the same as revoking the specific delegation signed by the issuer: any UCAN that contains a proof where the revoker matches the `iss` field — even transatively in the delegation chain — MAY be revoked.
@@ -75,29 +87,18 @@ Here Alice is the root issuer / resource owner. Alice MAY revoke any of the UCAN
 
 ## 2.2 Consistency Models
 
+UCAN revocation is designed to work in the broadest possible scenarios, and as such needs very weak constraints. UCAN revocation MAY operate in fully eventually consistent contexts, with single sources of truth, or among nodes participating in consensus. The format of the revocation does not change in these situations; it is entirely managed by how revocations are passed around the network.
 
-### 2.2.1 Eventual Consistency
-
-This mechanism is eventually consistent and SHOULD be considered the last line of defense against abuse. Proactive expiry via time bounds or other constraints SHOULD be preferred, as they do not require learning more information than what would be available on an offline computer.
-
-Note that the delivery tradeoff often associated with eventually consistent systems only apply in the worst case: it is entirely possible to communicate directly with the resource server when there is a single source of truth. The extra generality of eventual consistency allows UCAN revocations to be compatible with the weaker assumptions in resources such as [CRDT]s, when communicating over gossip channels, and at the edge.
-
-### 2.2.2 Direct Revocation
-
-While some resources are centralized (e.g. access to a server), others are unbound from specific locations (e.g. a CRDT), in which case it will take longer for the revocation to propagate.
-
-Every resource type SHOULD have a canonical location where its revocations are kept. This list is non-exclusive, and revocation messages MAY be gossiped between peers in a network to share this information more quickly.
-
-
-
-
+These weak assumptions are often associated with being unable to guarantee delivery in a certain time bound. Weak assumptions can always be strengthened, but not vice-versa. For example, if a capability describes access to a resource with a single location or souce of truth, sending a revocation to that specific agent enables confirmatation in bounded time. This grants nearly idential semantics that many people turn to ACLs for, but with all of the benefits of capabilties.
 
 # 3 Cache
 
 The agent that controls a resource SHOULD maintain a cache of revocations that it has seen. Other agents MAY also maintain a cache of revocations that they're aware of. On recept of a UCAN delegation or invocation, the 
 
 
+kepp them close to eth reouce
 
+MAY hold on to extra ones for othrs
 
 
 It is RECOMMENDED that the canonical revocation store be kept as close to (or inside) the resource it is about as possible. For example, the WebNative File System maintains a Merkle tree of revoked CIDs at a well-known path. Another example is that a centralized server could have an endpoint that lists the revoked UCANs by [canonical CID].
