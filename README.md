@@ -115,7 +115,7 @@ A revocation message MUST contain the following information:
 | `rvk` | [CIDv1]                            | The [canonical CID] of the UCAN being revoked              | Yes      |
 | `sig` | [base64-unpadded][RFC 4648] string | The base64 encoded signature of `` `REVOKE-UCAN:${rvk}` `` | Yes      |
 
-Revocations MAY be gossiped between systems. As such, they need to be parsable by a wide number of languages and contexts. To accomodate this, compliant UCAN revocations MUST be JSON-encoded.
+Revocations MAY be gossiped between systems. As such, they need to be parsable by a wide number of languages and contexts. To accommodate this, compliant UCAN revocations MUST be JSON-encoded.
 
 ## 4.1 `urv` UCAN Revocation Version
 

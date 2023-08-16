@@ -160,6 +160,7 @@ trustlessly
 ucan
 un
 unary
+unforgeable
 unpadded
 unresolvable
 url
