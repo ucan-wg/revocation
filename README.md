@@ -37,7 +37,7 @@ UCAN delegation is designed to be [local-first]. As such, [fail-stop] approaches
 
 UCAN revocation is the act of invalidating a proof in a delegation chain for some specific UCAN delegation by its CID. All UCAN capabilities are either claimed by direct authority over the resource, or by delegation chain terminating in that direct ("root") authority. Each link in a delegation chain contains an explicit issuer (delegator) and audience (delegatee).
 
-Revocations MUST be immutible and irreversible. Recipients of revocations SHOULD treat them as a grow-only set (see [XYZ] for eviction policies). If a revocation was issued in error, it MUST NOT be retracted — a new, unique UCAN delegation MAY be issued (e.g. by updating the nonce or changing the time bounds). This prevents confusion as the revocation moves through the network and makes [revocation stores] append-only and highly amenable to caching.
+Revocations MUST be immutible and irreversible. Recipients of revocations SHOULD treat them as a grow-only set (see the [eviction] section). If a revocation was issued in error, it MUST NOT be retracted — a new, unique UCAN delegation MAY be issued (e.g. by updating the nonce or changing the time bounds). This prevents confusion as the revocation moves through the network and makes [revocation stores] append-only and highly amenable to caching.
 
 ## 2.1 Scope 
 
@@ -180,6 +180,7 @@ We want to especially recognize [Mark Miller] for his numerous contributions to 
 
 <!-- Internal Links -->
 
+[eviction]: #32-eviction
 [revocation stores]: #3-store
 
 <!-- External Links -->
