@@ -25,7 +25,7 @@ Using the [principle of least authority][POLA] such as certificate expiry and re
 
 ## 1.1 Motivation
 
-Even when not in error at time of issuance, the trust relationship between a delegator and delegatee is not immutable. An agent can go rogue, keys can be compromised, and the privacy requirements of resources changed. While the UCAN delegation approach RECOMMENDS using the [principle of least authority][POLA], such unexpected conditions can and do arise. These are exceptional cases, but are sufficiently important that a well defined method for performing revocation is nearly always desired. Revocation is the act of invalidating a UCAN after the fact, outside of the limitations placed on it by the UCAN's fields (such as its expiry). 
+Even when not in error at time of issuance, the trust relationship between a delegator and delegatee is not immutable. An agent can go rogue, keys can be compromised, and the privacy requirements of resources can change. While the UCAN delegation approach RECOMMENDS using the [principle of least authority][POLA], such unexpected conditions can and do arise. These are exceptional cases, but are sufficiently important that a well defined method for performing revocation is nearly always desired. Revocation is the act of invalidating a UCAN after the fact, outside of the limitations placed on it by the UCAN's fields (such as its expiry). 
 
 ## 1.2 Approach
 
