@@ -100,7 +100,7 @@ For eventually consistent data structures, this MAY be achieved by including the
 
 ## 3.2 Eviction
 
-Revocations MAY be deleted once the UCAN that they reference expires or otherwise becomes invalid via its proactive mechanisms.
+Revocations MAY be deleted once the UCAN that they reference expires or otherwise becomes invalid through its proactive mechanisms.
 
 A revocation store MOST only keep UCAN revocations for UCANs that are otherwise still valid. For example, expired UCANs are already invalid, so a revocation MUST NOT affect this invalid status. The revocation is thus redundant, and MAY be evicted from the store.
 
