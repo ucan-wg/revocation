@@ -21,7 +21,7 @@ This specification describes the format and semantics for revoking a previously 
 
 # 1 Introduction
 
-Using the [principle of least authority][POLA] such as certificate expiry and reduced capabilty scope SHOULD be the preferred method for securing a UCAN, but does not cover every situation. Revocation is a manual method for reversing a delegation. It is not a perfect method, and cannot undo irreversable actions already performed with capability, but MAY limit misuse going forward.
+Using the [principle of least authority][POLA] such as certificate expiry and reduced capability scope SHOULD be the preferred method for securing a UCAN, but does not cover every situation. Revocation is a manual method for reversing a delegation. It is not a perfect method, and cannot undo irreversable actions already performed with capability, but MAY limit misuse going forward.
 
 ## 1.1 Motivation
 
@@ -41,9 +41,9 @@ Revocations MUST be immutible and irreversible. Recipients of revocations SHOULD
 
 ## 2.1 Scope 
 
-An issuer of a proof in a delegation chain MAY revoke access to the capabilties that it granted. Note that this is not the same as revoking the specific delegation signed by the issuer: any UCAN that contains a proof where the revoker matches the `iss` field — even transatively in the delegation chain — MAY be revoked.
+An issuer of a proof in a delegation chain MAY revoke access to the capabilities that it granted. Note that this is not the same as revoking the specific delegation signed by the issuer: any UCAN that contains a proof where the revoker matches the `iss` field — even transatively in the delegation chain — MAY be revoked.
 
-Revocation by a particular proof does not guarantee that the principle no longer has access to the capabilty in question. If a principal is able to construct a valid proof chain without relying on the revoked proof, they still have access to the capability. By real-world analogy, if Mallory has two tickets to a film, and one of them is invalidated by its serial number, she is still able to present the valid ticket to see the film.
+Revocation by a particular proof does not guarantee that the principle no longer has access to the capability in question. If a principal is able to construct a valid proof chain without relying on the revoked proof, they still have access to the capability. By real-world analogy, if Mallory has two tickets to a film, and one of them is invalidated by its serial number, she is still able to present the valid ticket to see the film.
 
 ### 2.1.1 Example
 
@@ -80,7 +80,7 @@ Here Alice is the root issuer / resource owner. Alice MAY revoke any of the UCAN
 UCAN revocation is designed to work in the broadest possible scenarios, and as such needs very weak constraints. UCAN revocation MAY operate in fully eventually consistent contexts, with single sources of truth, or among nodes participating in consensus. The format of the revocation does not change in these situations; it is entirely managed by how revocations are passed around the network. 
 Weak assumptions enable UCAN to work with eventually consistent resources, such as [CRDT]s, [Git] forks, delay-tolerant replicated state machines, and so on.
 
-These weak assumptions are often associated with being unable to guarantee delivery in a certain time bound. Weak assumptions can always be strengthened, but not vice-versa. For example, if a capability describes access to a resource with a single location or souce of truth, sending a revocation to that specific agent enables confirmatation in bounded time. This grants nearly idential semantics that many people turn to [ACL]s for, but with all of the benefits of capabilties during delegation and invocation.
+These weak assumptions are often associated with being unable to guarantee delivery in a certain time bound. Weak assumptions can always be strengthened, but not vice-versa. For example, if a capability describes access to a resource with a single location or souce of truth, sending a revocation to that specific agent enables confirmatation in bounded time. This grants nearly idential semantics that many people turn to [ACL]s for, but with all of the benefits of capabilities during delegation and invocation.
 
 Out of order delivery is typical of distributed systems. Further, a mallicious user can otherwise delay revealing that they have a capability until the last possible moment in hopes of evading detection. Accepting revocations for resources that the agent controls prior to the delegation targeted by the revocaton is recieved is thus RECOMMENDED. 
 
@@ -152,15 +152,15 @@ The `sig` field MUST contain a signature that validates against the revoker's DI
 
 [SPKI/SDSI] is closely related to UCAN. A different format is used, and some details vary (such as a delegation-locking bit), but the core idea and general usage pattern are very close. UCAN can be seen as making these ideas more palatable to a modern audience and adding a few features such as content IDs that were less widespread at the time SPKI/SDSI were written.
 
-[X.509 Certificate Revocation Lists][RFC 5280] defines two kinds of certificate invalidaton: temporary ("hold") and permanent ("revocation"). This RFC also includes a field for indicating a reason for revocation. UCAN Revocation has no concept of a temporary hold on a capabilty, but this behaviour MAY be emulated by revoking a credential and issuing a new UCAN with a `nbf` field set to a time in the future.
+[X.509 Certificate Revocation Lists][RFC 5280] defines two kinds of certificate invalication: temporary ("hold") and permanent ("revocation"). This RFC also includes a field for indicating a reason for revocation. UCAN Revocation has no concept of a temporary hold on a capability, but this behavior MAY be emulated by revoking a credential and issuing a new UCAN with a `nbf` field set to a time in the future.
 
-[ZCAP-LD] is closely related to UCAN, but situated in the W3C-style linked data world (the "LD" in ZCAP-LD). Revocation in ZCAP-LD is only granted to those who have a special caveat on a capabilty. In contrast, UCAN capabilties MAY be revoked by anyone in the relevant deleagtion path.
+[ZCAP-LD] is closely related to UCAN, but situated in the W3C-style linked data world (the "LD" in ZCAP-LD). Revocation in ZCAP-LD is only granted to those who have a special caveat on a capability. In contrast, UCAN capabilities MAY be revoked by anyone in the relevant delegation path.
 
-[OAuth 2.0 Revocation][RFC 7009] is very similar to UCAN revocation. It is largely concerned with the HTTP interactions to make OAuth revocation work. OAuth doesn't have a concept of subdelegation, so only the user that has been granted the token can revoke it. However, this may cascade to revocation of other tokens, but the exact mechanism is left to the implementer.
+[OAuth 2.0 Revocation][RFC 7009] is very similar to UCAN revocation. It is largely concerned with the HTTP interactions to make OAuth revocation work. OAuth doesn't have a concept of sub-delegation, so only the user that has been granted the token can revoke it. However, this may cascade to revocation of other tokens, but the exact mechanism is left to the implementer.
 
-While strctly speaking being about assertions rather than capabilities, [Verfiable Credential Revocation][VC Revocation] spec follows a similar pattern to those listed above.
+While strictly speaking being about assertions rather than capabilities, [Verfiable Credential Revocation][VC Revocation] spec follows a similar pattern to those listed above.
 
-[E][E-lang]-style [object capabilities][Robust Composition] use active nework connections with [proxy agents][Robust Composition] to revoke delegations. Revocation is achoeved by shutting down that proxy to break the authorizing reference. In many ways, UCAN Revocation attempts to emulate this behaviour. Unlike UCAN REvocations, E-style object capabilities are [fail-stop] and thus by defnition not partition tolerant.
+[E][E-lang]-style [object capabilities][Robust Composition] use active network connections with [proxy agents][Robust Composition] to revoke delegations. Revocation is achoeved by shutting down that proxy to break the authorizing reference. In many ways, UCAN Revocation attempts to emulate this behavior. Unlike UCAN Revocations, E-style object capabilities are [fail-stop] and thus by defnition not partition tolerant.
 
 # 6 Acknowledgements
 

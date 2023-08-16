@@ -1,5 +1,6 @@
 ACL
 ACLs
+Acknowledgements
 AlicePhone
 AliceRoot
 Attenuations
@@ -43,6 +44,7 @@ Memoized
 Merkle
 Mikael
 MkiTBz
+OAuth
 OCAP
 OCapN
 PITM
@@ -60,6 +62,7 @@ SPKI
 ScopeA
 ScopeB
 Seitan
+Semver
 Subschemes
 TXT
 TypeScript
@@ -68,6 +71,7 @@ UCAN's
 UCANs
 URI
 URIs
+UTF
 Vandevelde
 WG
 WebNative
@@ -119,6 +123,9 @@ multicodec
 namespace
 namespaced
 namespaces
+naud
+ncap
+niss
 nota
 plaintext
 potencies
@@ -129,6 +136,7 @@ reauthorizations
 recommentations
 redelegate
 redelegates
+revoker's
 rootAud
 rootCap
 rootIss
