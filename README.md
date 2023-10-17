@@ -123,6 +123,8 @@ Revocation by a particular proof does not guarantee that the principle no longer
 ``` mermaid
 flowchart TB
     subgraph RA[Alice can revoke]
+        direction RL
+        
         AB["(Root)\niss: Alice\naud: Bob\ncap:[X,Y,Z]"]
 
         subgraph RB[Bob can revoke]
