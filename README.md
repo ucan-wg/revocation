@@ -1,25 +1,31 @@
-# UCAN Revocation Specification 1.0.0-rc.1
+# UCAN Revocation Specification v1.0.0-rc.1
 
 ## Editors
 
-* [Brooklyn Zelenka], [Fission]
+- [Brooklyn Zelenka], [Fission]
 
 ## Authors
 
-* [Brooklyn Zelenka], [Fission]
-* [Daniel Holmgren], [Bluesky]
-* [Irakli Gozalishvili], [Protocol Labs]
-* [Philipp Krüger], [Fission]
+- [Brooklyn Zelenka], [Fission]
+- [Irakli Gozalishvili], [Protocol Labs]
+- [Philipp Krüger], [Fission]
+
+## Dependencies
+
+- [DID]
+- [IPLD]
+- [UCAN Delegation]
+- [UCAN Invocation]
 
 ## Language
 
-The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in [BCP 14] when, and only when, they appear in all capitals, as shown here.
+The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in [RFC 2119].
 
-# 0 Abstract
+# 0. Abstract
 
-This specification describes the format and semantics for revoking a previously issued UCAN delegation.
+This specification defines the semantics of revoking a [UCAN Delegation], and the ability to delegate such the ability to revoke a capability separately from the capability.
 
-# 1 Introduction
+# 1. Introduction
 
 Using the [principle of least authority][POLA] such as certificate expiry and reduced capability scope SHOULD be the preferred method for securing a UCAN, but does not cover every situation. Revocation is a manual method for reversing a delegation. It is not a perfect method, and cannot undo irreversible actions already performed with capability, but MAY limit misuse going forward.
 
@@ -29,9 +35,77 @@ Even when not in error at time of issuance, the trust relationship between a del
 
 ## 1.2 Approach
 
+UCAN delegation is designed to be [local-first]. As such, [fail-stop] approaches are not suitable. Revocation is accomplished by delivery of an unforgeable message from a previous delegator.
+
 UCAN Revocations are similar to [block lists]: they identify delegations that are retracted and no longer suitable for use. Revocation SHOULD be considered the last line of defense against abuse. Proactive expiry through time bounds or other constraints SHOULD be preferred, as they do not require learning more information than what would be available on an offline computer.
 
-UCAN delegation is designed to be [local-first]. As such, [fail-stop] approaches are not suitable. Revocation is accomplished by delivery of an unforgeable message from a previous delegator.
+A UCAN Revocation is a mechanism for invalidating a particular Delegation when used in conjunction with another Delegation in an Invocation proof chain. This is a second-order reference, and is described in the following diagram:
+
+``` mermaid
+flowchart RL
+    invoker((&nbsp&nbsp&nbsp&nbspDan&nbsp&nbsp&nbsp&nbsp))
+    revoker((&nbsp&nbsp&nbsp&nbspBob&nbsp&nbsp&nbsp&nbsp))
+    subject((&nbsp&nbsp&nbsp&nbspAlice&nbsp&nbsp&nbsp&nbsp))
+
+    subgraph Delegations
+        subgraph root [Root UCAN]
+            subgraph rooting [Root Issuer]
+                rootIss(iss: Alice)
+                rootSub(sub: Alice)
+            end
+
+            rootAud(aud: Bob)
+        end
+
+        subgraph del1 [Delegated UCAN]
+            del1Iss(iss: Bob) --> rootAud
+            del1Sub(sub: Alice)
+            del1Aud(aud: Carol)
+
+
+            del1Sub --> rootSub
+        end
+
+        subgraph del2 [☠️ Delegated UCAN ☠️]
+            del2Iss(iss: Carol) --> del1Aud
+            del2Sub(sub: Alice)
+            del2Aud(aud: Dan)
+
+            del2Sub --> del1Sub
+        end
+    end
+
+    subgraph rev [Revocation]
+        revCmd("cmd: ucan/revoke")
+        revArg("arg: {revoke: cid(carol_to_dan)}")
+        revIss(iss: Bob)
+        revPrf("proofs")
+    end
+
+     subgraph inv [☠️ Invocation ☠️]
+        invSub(sub: Alice)
+        invIss(iss: Dan)
+        invPrf("proofs")
+    end
+
+    revoker --> revIss
+    revArg:::revoked -.-> del2:::revoked
+    revIss -.-> del1Iss
+    revPrf:::revocation -.-> del1:::revocation
+
+    inv:::revoked
+    invPrf:::revoked
+
+    invIss --> del2Aud
+    invoker --> invIss
+    invSub --> del2Sub
+    rootIss --> subject
+    rootSub --> subject
+    invPrf --> Delegations
+
+    classDef revocation stroke:blue,fill:#76b0ff
+    classDef revoked stroke:red,fill:#ff7676,color:red
+```
 
 # 2 Semantics
 
@@ -177,6 +251,169 @@ Many thanks to [Christine Lemmer-Webber] for her handwritten(!) feedback on the 
 Thanks to the entire [SPKI WG][SPKI/SDSI] for their closely related pioneering work.
 
 We want to especially recognize [Mark Miller] for his numerous contributions to the field of distributed auth, programming languages, and computer security writ large.
+
+# 6. Acknowledgments
+
+Thank you to [Brendan O'Brien] for real-world feedback, technical collaboration, and implementing the first Golang UCAN library.
+
+Many thanks to [Hugo Dias], [Mikael Rogers], and the entire DAG House team for the real world feedback, and finding inventive new use cases.
+
+Thank you [Blaine Cook] for the real-world feedback, ideas on future features, and lessons from other auth standards.
+
+Many thanks to [Brian Ginsburg] and [Steven Vandevelde] for their many copy edits, feedback from real world usage, maintenance of the TypeScript implementation, and tools such as [ucan.xyz].
+
+Many thanks to [Christopher Joel] for his real-world feedback, raising many pragmatic considerations, and the Rust implementation and related crates.
+
+Many thanks to [Christine Lemmer-Webber] for her handwritten(!) feedback on the design of UCAN, spearheading the [OCapN] initiative, and her related work on [ZCAP-LD].
+
+Thanks to [Benjamin Goering] for the many community threads and connections to [W3C] standards.
+
+Thanks to [Juan Caballero] for the numerous questions, clarifications, and general advice on putting together a comprehensible spec.
+
+Thank you [Dan Finlay] for being sufficiently passionate about [OCAP] that we realized that capability systems had a real chance of adoption in an ACL-dominated world.
+
+Thanks to the entire [SPKI WG][SPKI/SDSI] for their closely related pioneering work.
+
+Many thanks to [Alan Karp] for sharing his vast experience with capability-based authorization, patterns, and many right words for us to search for.
+
+We want to especially recognize [Mark Miller] for his numerous contributions to the field of distributed auth, programming languages, and computer security writ large.
+
+<!-- Footnotes -->
+
+[^js-num-size]: JavaScript has a single numeric type ([`Number`][JS Number]) for both integers and floats. This representation is defined as a [IEEE-754] double-precision floating point number, which has a 53-bit significand.
+
+<!-- Internal Links -->
+
+[Ability]: #43-ability
+[Caveat]: #44-caveats
+[Envelope]: #2-delegation-envelope
+[Meta]: #35-meta
+[Payload]: #3-delegation-payload
+[Subject]: #41-subject
+[True Caveat]: #441-the-true-caveat
+[Wildcard Ability]: #4312--aka-wildcard
+
+<!-- External Links -->
+
+[Alan Karp]: https://github.com/alanhkarp
+[Benjamin Goering]: https://github.com/gobengo
+[Blaine Cook]: https://github.com/blaine
+[Bluesky]: https://blueskyweb.xyz/
+[Brendan O'Brien]: https://github.com/b5
+[Brian Ginsburg]: https://github.com/bgins
+[Brooklyn Zelenka]: https://github.com/expede
+[CIDv1]: https://github.com/multiformats/cid?tab=readme-ov-file#cidv1
+[Christine Lemmer-Webber]: https://github.com/cwebber
+[Christopher Joel]: https://github.com/cdata
+[DAG-CBOR]: https://ipld.io/specs/codecs/dag-cbor/spec/
+[DID fragment]: https://www.w3.org/TR/did-core/#terminology
+[DID]: https://www.w3.org/TR/did-core/
+[Dan Finlay]: https://github.com/danfinlay
+[Daniel Holmgren]: https://github.com/dholms
+[ES256]: https://www.rfc-editor.org/rfc/rfc7518#section-3.4
+[EdDSA]: https://en.wikipedia.org/wiki/EdDSA
+[Executor]: https://github.com/ucan-wg/spec#31-roles
+[Fission]: https://fission.codes
+[Hugo Dias]: https://github.com/hugomrdias
+[IEEE-754]: https://ieeexplore.ieee.org/document/8766229
+[IPLD]: https://ipld.io/
+[Ink & Switch]: https://www.inkandswitch.com/
+[Invocation]: https://github.com/ucan-wg/invocation
+[Irakli Gozalishvili]: https://github.com/Gozala
+[JS Number]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number
+[Juan Caballero]: https://github.com/bumblefudge
+[Mark Miller]: https://github.com/erights
+[Martin Kleppmann]: https://martin.kleppmann.com/
+[Mikael Rogers]: https://github.com/mikeal/
+[OCAP]: https://en.wikipedia.org/wiki/Object-capability_model
+[OCapN]: https://github.com/ocapn/
+[Command]: https://github.com/ucan-wg/spec#33-command
+[Philipp Krüger]: https://github.com/matheus23
+[PoLA]: https://en.wikipedia.org/wiki/Principle_of_least_privilege
+[Protocol Labs]: https://protocol.ai/
+[RFC 3339]: https://www.rfc-editor.org/rfc/rfc3339
+[RFC 8037]: https://www.rfc-editor.org/rfc/rfc8037
+[RS256]: https://www.rfc-editor.org/rfc/rfc7518#section-3.3
+[Raw data multicodec]: https://github.com/multiformats/multicodec/blob/master/table.csv#L41
+[SHA2-256]: https://github.com/multiformats/multicodec/blob/master/table.csv#L9
+[SPKI/SDSI]: https://datatracker.ietf.org/wg/spki/about/
+[SPKI]: https://theworld.com/~cme/html/spki.html
+[Steven Vandevelde]: https://github.com/icidasset
+[UCAN Invocation]: https://github.com/ucan-wg/invocation
+[UCAN]: https://github.com/ucan-wg/spec
+[W3C]: https://www.w3.org/
+[ZCAP-LD]: https://w3c-ccg.github.io/zcap-spec/
+[`did:key`]: https://w3c-ccg.github.io/did-method-key/
+[`did:plc`]: https://github.com/did-method-plc/did-method-plc
+[`did:web`]: https://w3c-ccg.github.io/did-method-web/
+[base32]: https://github.com/multiformats/multibase/blob/master/multibase.csv#L13
+[dag-json multicodec]: https://github.com/multiformats/multicodec/blob/master/table.csv#L112
+[did:key ECDSA]: https://w3c-ccg.github.io/did-method-key/#p-256
+[did:key EdDSA]: https://w3c-ccg.github.io/did-method-key/#ed25519-x25519
+[did:key RSA]: https://w3c-ccg.github.io/did-method-key/#rsa
+[external resource]: https://github.com/ucan-wg/spec#55-wrapping-existing-systems
+[revocation]: https://github.com/ucan-wg/revocation
+[ucan.xyz]: https://ucan.xyz
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# UCAN Revocation Specification 1.0.0-rc.1
+
+
+
+
+
+
+
+
+
+> The discussion talks about zAlice, and Alice delegating revoke permission to any UCAN she has created.  That's a useful feature, but one that needs to be tightly controlled, e.g., don't delegate to Mallory.  I'm sure people in this discussion know that Alice can have many keys,  which means she can control who can revoke subsets of the UCANs she creates by using a different key for each subset.  As a result, the damage that can happen if Bob delegates to Mallory is controllable.  I'm just making this point explicit because I've been in discussions that rabbit holed because people got into the mode of a single key per person.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# 1 Introduction
+
+
 
 <!-- Internal Links -->
 
