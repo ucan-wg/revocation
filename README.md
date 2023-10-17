@@ -59,17 +59,16 @@ flowchart RL
 
         subgraph del1 [Delegated UCAN]
             del1Iss(iss: Bob) --> rootAud
-            del1Sub(sub: Alice)
             del1Aud(aud: Carol)
-
+            del1Sub(sub: Alice)
 
             del1Sub --> rootSub
         end
 
         subgraph del2 [INVALIDATED Delegation]
             del2Iss(iss: Carol) --> del1Aud
-            del2Sub(sub: Alice)
             del2Aud(aud: Dan)
+            del2Sub(sub: Alice)
 
             del2Sub --> del1Sub
         end
@@ -78,8 +77,8 @@ flowchart RL
     subgraph rev [Revocation]
         revArg("arg: {revoke: cid(carol_to_dan)}")
         revCmd("cmd: ucan/revoke")
-        revPrf("proofs")
         revIss(iss: Bob)
+        revPrf("proofs")
     end
 
      subgraph inv [INVALIDATED Invocation]
