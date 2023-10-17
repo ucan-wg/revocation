@@ -66,7 +66,7 @@ flowchart RL
             del1Sub --> rootSub
         end
 
-        subgraph del2 [☠️ Delegated UCAN ☠️]
+        subgraph del2 [INVALIDATED Delegation]
             del2Iss(iss: Carol) --> del1Aud
             del2Sub(sub: Alice)
             del2Aud(aud: Dan)
@@ -82,7 +82,7 @@ flowchart RL
         revPrf("proofs")
     end
 
-     subgraph inv [☠️ Invocation ☠️]
+     subgraph inv [INVALIDATED Invocation]
         invSub(sub: Alice)
         invIss(iss: Dan)
         invPrf("proofs")
