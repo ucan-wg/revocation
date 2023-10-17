@@ -76,10 +76,10 @@ flowchart RL
     end
 
     subgraph rev [Revocation]
-        revCmd("cmd: ucan/revoke")
         revArg("arg: {revoke: cid(carol_to_dan)}")
-        revIss(iss: Bob)
+        revCmd("cmd: ucan/revoke")
         revPrf("proofs")
+        revIss(iss: Bob)
     end
 
      subgraph inv [INVALIDATED Invocation]
