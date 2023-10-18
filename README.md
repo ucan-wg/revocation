@@ -163,16 +163,14 @@ During validation of a UCAN delegation chain, the [canonical CID] of each UCAN d
 
 ``` js
 // Pseudocode
+const delegators = invocation.prf.map(proof => proof.iss)
 
-const proofs = invocation.prf
-const delegators = new Set(proofs.map(proof => proof.iss))
-
-proofs.forEach(delegation => {
+invocation.prf.forEach(delegation => {
   // Is the proof in the revocation store?
   store.lookup(delegation).then(revocation => {
 
     // Is the revocation issuer in this proof chain?
-    if (delegators.has(revocation.iss)) {
+    if (delegators.includes(revocation.iss)) {
       throw new Error("Revoked")
     }
   })
