@@ -33,7 +33,7 @@ Even when not in error at time of issuance, the trust relationship between a del
 
 # 2 Approach
 
-UCAN delegation is designed to be [local-first], partition-tolerant, cacheable, and latency-reducing. As such, [fail-stop] approaches are not suitable. Revocation is accomplished by delivery of an unforgeable message from a previous delegator.
+UCAN delegation is designed to be [local-first], partition-tolerant, cacheable, and latency-reducing. As such, [fail-safe] approaches are not suitable. Revocation is accomplished by delivery of an unforgeable message from a previous delegator.
 
 UCAN Revocations are similar to [block lists]: they identify delegation paths that are retracted and no longer suitable for use. Revocation SHOULD be considered the last line of defense against abuse. Proactive expiry through time bounds or other constraints SHOULD be preferred, as they do not require learning more information than what would be available on an offline computer.
 
@@ -108,7 +108,7 @@ flowchart RL
 
 Revocation is the act of invalidating a proof in a delegation chain for some specific UCAN delegation by its CID. All UCAN capabilities are either claimed by direct authority over the Subject, or by delegation chain terminating in that direct ("root") authority. Each link in a delegation chain contains an explicit issuer (delegator) and audience (delegatee).
 
-_Revocations MUST be immutable and irreversible._ Recipients of revocations SHOULD treat them as a monotonically-growing set. If a Revocation was issued in error, it MUST NOT be retracted — a new, unique UCAN delegation MAY be issued (e.g. by updating the nonce or changing the time bounds). This prevents confusion as the revocation moves through the network and makes [revocation stores] append-only and highly amenable to caching and gossip.
+_Revocations MUST be immutable and irreversible._ Recipients of revocations SHOULD treat them as a monotonically-growing set. If a Revocation was issued in error, it MUST NOT be retracted — a new, unique UCAN delegation MAY be issued (e.g. by updating the nonce or changing the time bounds). This prevents confusion as the revocation moves through the network and makes [revocation store]s append-only and highly amenable to caching and gossip.
 
 ## 3.1 Scope 
 
@@ -202,7 +202,7 @@ flowchart LR
     del1{{Delegate\ncan: crud/read Alice's DB}}
     del2{{Delegate\ncan: crud/read Alice's DB}}
     del3{{Delegate\ncan: crud/read Alice's DB}}
-    newDel{{"Delegate\ncan: crud/read Alice's DB\nnnc: 'different-nonce'\n(Resissued) "}}
+    newDel{{"Delegate\ncan: crud/read Alice's DB\n(Resissued) "}}
 
     Alice === del1 ==> Bob === del2:::Revoked ===x Carol === del3 ==> Dan
     Alice === newDel:::Reissued ===> Carol
@@ -231,7 +231,7 @@ Revocations MAY be evicted once the UCAN that they reference expires or otherwis
 
 # 5 Delegating Revocation
 
-The authority to revoke some Delegation MAY be itself delegated to a Principal not in the delegation chain.
+The authority to revoke some Delegation MAY be itself delegated to a Principal not in the delegation chain. The revoked Delegation SHOULD be referenced by its [canonical CID].
 
 | Field | Value                    |
 |-------|--------------------------|
@@ -303,7 +303,7 @@ Being expressed as an Invocation means that Revocations MUST define an Action ty
 | Field | Type            | Required | Description                                                              |
 |-------|-----------------|----------|--------------------------------------------------------------------------|
 | `rev` | `&Delegation`   | Yes      | The CID of the [UCAN Delegation] that is being revoked                   |
-| `pth` | `[&Delegation]` | No       | [A delegation path] that includes the Revoker and the revoked Delegation |
+| `pth` | `[&Delegation]` | No       | A [delegation path] that includes the Revoker and the revoked Delegation |
 
 ### 6.1.1 Path Witness
 
@@ -334,7 +334,7 @@ Unlike Mallory, Bob, Carol, and Dan can both provide valid delegation paths that
 
 While strictly speaking being about assertions rather than capabilities, [Verfiable Credential Revocation][VC Revocation] spec follows a similar pattern to those listed above.
 
-[E][E-lang]-style [object capabilities][Robust Composition] use active network connections with [proxy agents][Robust Composition] to revoke delegations. Revocation is achieved by shutting down that proxy to break the authorizing reference. In many ways, UCAN Revocation attempts to emulate this behavior. Unlike UCAN Revocations, E-style object capabilities are [fail-stop] and thus by definition not partition tolerant.
+[E][E-lang]-style [object capabilities][Robust Composition] use active network connections with [proxy agents][Robust Composition] to revoke delegations. Revocation is achieved by shutting down that proxy to break the authorizing reference. In many ways, UCAN Revocation attempts to emulate this behavior. Unlike UCAN Revocations, E-style object capabilities are [fail-safe] and thus by definition not partition tolerant.
 
 # 8 Acknowledgements
 
@@ -352,7 +352,7 @@ Thanks to the entire [SPKI WG][SPKI/SDSI] for their closely related pioneering w
 
 We want to especially recognize [Mark Miller] for his numerous contributions to the field of distributed auth, programming languages, and computer security writ large.
 
-# 6. Acknowledgments
+# 9. Acknowledgments
 
 Thanks to the entire [SPKI WG][SPKI/SDSI] for their closely related pioneering work.
 
@@ -364,9 +364,14 @@ We want to especially recognize [Mark Miller] for his numerous contributions to 
 
 <!-- Internal Links -->
 
+[Arguments]: #61-arguments
+[delegation path]: #611-path-witness
+[revocation store]: #4-store
+
 <!-- External Links -->
 
- [Alan Karp]: https://github.com/alanhkarp
+[ACL]: https://en.wikipedia.org/wiki/Access-control_list
+[Alan Karp]: https://github.com/alanhkarp
 [Benjamin Goering]: https://github.com/gobengo
 [Blaine Cook]: https://github.com/blaine
 [Bluesky]: https://blueskyweb.xyz/
@@ -374,6 +379,8 @@ We want to especially recognize [Mark Miller] for his numerous contributions to 
 [Brian Ginsburg]: https://github.com/bgins
 [Brooklyn Zelenka]: https://github.com/expede
 [CIDv1]: https://github.com/multiformats/cid?tab=readme-ov-file#cidv1
+[CRDT]: https://en.wikipedia.org/wiki/Conflict-free_replicated_data_type
+[Cert Revocation Wikipedia]: https://en.wikipedia.org/wiki/Certificate_revocation
 [Christine Lemmer-Webber]: https://github.com/cwebber
 [Christopher Joel]: https://github.com/cdata
 [Command]: https://github.com/ucan-wg/spec#33-command
@@ -382,10 +389,12 @@ We want to especially recognize [Mark Miller] for his numerous contributions to 
 [DID]: https://www.w3.org/TR/did-core/
 [Dan Finlay]: https://github.com/danfinlay
 [Daniel Holmgren]: https://github.com/dholms
+[E-lang]: http://www.erights.org/
 [ES256]: https://www.rfc-editor.org/rfc/rfc7518#section-3.4
 [EdDSA]: https://en.wikipedia.org/wiki/EdDSA
 [Executor]: https://github.com/ucan-wg/spec#31-roles
 [Fission]: https://fission.codes
+[Git]: https://git-scm.com/
 [Hugo Dias]: https://github.com/hugomrdias
 [IEEE-754]: https://ieeexplore.ieee.org/document/8766229
 [IPLD]: https://ipld.io/
@@ -403,6 +412,8 @@ We want to especially recognize [Mark Miller] for his numerous contributions to 
 [PoLA]: https://en.wikipedia.org/wiki/Principle_of_least_privilege
 [Protocol Labs]: https://protocol.ai/
 [RFC 3339]: https://www.rfc-editor.org/rfc/rfc3339
+[RFC 5280]: https://www.rfc-editor.org/rfc/rfc5280
+[RFC 7009]: https://www.rfc-editor.org/rfc/rfc7009
 [RFC 8037]: https://www.rfc-editor.org/rfc/rfc8037
 [RS256]: https://www.rfc-editor.org/rfc/rfc7518#section-3.3
 [Raw data multicodec]: https://github.com/multiformats/multicodec/blob/master/table.csv#L41
@@ -413,17 +424,23 @@ We want to especially recognize [Mark Miller] for his numerous contributions to 
 [UCAN Delegation]: https://github.com/ucan-wg/delegation
 [UCAN Invocation]: https://github.com/ucan-wg/invocation
 [UCAN]: https://github.com/ucan-wg/spec
+[VC Revocation]: https://learn.microsoft.com/en-us/azure/active-directory/verifiable-credentials/how-to-issuer-revoke
 [W3C]: https://www.w3.org/
 [ZCAP-LD]: https://w3c-ccg.github.io/zcap-spec/
 [`did:key`]: https://w3c-ccg.github.io/did-method-key/
 [`did:plc`]: https://github.com/did-method-plc/did-method-plc
 [`did:web`]: https://w3c-ccg.github.io/did-method-web/
 [base32]: https://github.com/multiformats/multibase/blob/master/multibase.csv#L13
+[block list]: https://en.wikipedia.org/wiki/Blacklist_(computing)
+[canonical CID]: https://github.com/ucan-wg/spec#41-content-identifiers
 [dag-json multicodec]: https://github.com/multiformats/multicodec/blob/master/table.csv#L112
 [did:key ECDSA]: https://w3c-ccg.github.io/did-method-key/#p-256
 [did:key EdDSA]: https://w3c-ccg.github.io/did-method-key/#ed25519-x25519
 [did:key RSA]: https://w3c-ccg.github.io/did-method-key/#rsa
 [external resource]: https://github.com/ucan-wg/spec#55-wrapping-existing-systems
+[fail-safe]: https://en.wikipedia.org/wiki/Fail-safe
+[local-first]: https://www.inkandswitch.com/local-first/
+[object capabilities]: https://en.wikipedia.org/wiki/Object-capability_model
 [revocation]: https://github.com/ucan-wg/revocation
 [store and forward]: https://en.wikipedia.org/wiki/Store_and_forward
 [ucan.xyz]: https://ucan.xyz
