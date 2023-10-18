@@ -190,7 +190,7 @@ For eventually consistent data structures, this MAY be achieved by including the
 
 ## 4.2 Monotonicity
 
-Since Revocations MUST NOT be reversable, a new Delegation SHOULD be issued if a Revocation was issued in error.
+Since Revocations MUST NOT be reversible, a new Delegation SHOULD be issued if a Revocation was issued in error.
 
 ``` mermaid
 flowchart LR
