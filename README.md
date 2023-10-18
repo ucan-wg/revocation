@@ -202,7 +202,7 @@ flowchart LR
     del1{{Delegate\ncan: crud/read Alice's DB}}
     del2{{Delegate\ncan: crud/read Alice's DB}}
     del3{{Delegate\ncan: crud/read Alice's DB}}
-    newDel{{"Delegate\ncan: crud/read Alice's DB\n(Resissued) "}}
+    newDel{{"Delegate\ncan: crud/read Alice's DB\nnnc: "different-nonce"\n(Resissued) "}}
 
     Alice === del1 ==> Bob === del2:::Revoked ===x Carol === del3 ==> Dan
     Alice === newDel:::Reissued ===> Carol
