@@ -181,7 +181,7 @@ A revocation store MUST keep UCAN revocations for UCANs that are otherwise still
 
 # 3 Expiry
 
-FIXME Note on expiry
+Revocations MUST NOT expire. If a Revocation was issued in error, 
 
 # 4 Action
 
@@ -201,10 +201,10 @@ Note that per [UCAN Invocation], the `nnc` field SHOULD is set to `""` since rev
 
 Being expressed as an Invocation means that Revocations MUST define an Action type for the command `ucan/revoke`.
 
-| Field | Type            | Required | Description                                                                           |
-|-------|-----------------|----------|---------------------------------------------------------------------------------------|
-| `rev` | `&Delegation`   | Yes      | The [UCAN Delegation] that is being revoked                                           |
-| `pth` | `[&Delegation]` | No       | [Proof of delegation path] from a delegation by the Revoker to the revoked Delegation |
+| Field | Type            | Required | Description                                                              |
+|-------|-----------------|----------|--------------------------------------------------------------------------|
+| `rev` | `&Delegation`   | Yes      | The [UCAN Delegation] that is being revoked                              |
+| `pth` | `[&Delegation]` | No       | [A delegation path] that includes the Revoker and the revoked Delegation |
 
 ### 4.1.1 Revoked Delegation
 
@@ -223,44 +223,7 @@ flowchart LR
 
 Mallory is not in the delegation chain of Erin. This is fine, since the semantics of revocation merely state that she would assert that no delegation of hers may be used in the `prf` field of an Invocation if it also includes the `rev` Delegation. However, issuing spurious Revocations and requiring them to be stored is a potential DoS vector. Executors MAY require a delegation path witness be included to avoid this situaton.
  
-Unlike Mallory, Bob, Carol, and Dan can both provide valid delegation paths that include Delegations that they have issued. Bob has two paths (`Bob -> Dan -> Erin` or `Bob -> Carol -> Erin`), but either will suffice.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Revocations MAY be gossiped between systems. As such, they need to be parsable by a wide number of languages and contexts. To accommodate this, compliant UCAN revocations MUST be JSON-encoded.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+Unlike Mallory, Bob, Carol, and Dan can both provide valid delegation paths that include Delegations that they have issued. Bob has two paths (`Alice -> Bob -> Dan -> Erin` or `Alice -> Bob -> Carol -> Erin`), and either will suffice.
 
 # 5 Prior Art
 
