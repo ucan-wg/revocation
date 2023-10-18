@@ -370,9 +370,9 @@ We want to especially recognize [Mark Miller] for his numerous contributions to 
 
 <!-- External Links -->
 
-[Robust Composition]: http://www.erights.org/talks/thesis/markm-thesis.pdf
 [ACL]: https://en.wikipedia.org/wiki/Access-control_list
 [Alan Karp]: https://github.com/alanhkarp
+[BCP 14]: https://www.rfc-editor.org/info/bcp14
 [Benjamin Goering]: https://github.com/gobengo
 [Blaine Cook]: https://github.com/blaine
 [Bluesky]: https://blueskyweb.xyz/
@@ -418,6 +418,7 @@ We want to especially recognize [Mark Miller] for his numerous contributions to 
 [RFC 8037]: https://www.rfc-editor.org/rfc/rfc8037
 [RS256]: https://www.rfc-editor.org/rfc/rfc7518#section-3.3
 [Raw data multicodec]: https://github.com/multiformats/multicodec/blob/master/table.csv#L41
+[Robust Composition]: http://www.erights.org/talks/thesis/markm-thesis.pdf
 [SHA2-256]: https://github.com/multiformats/multicodec/blob/master/table.csv#L9
 [SPKI/SDSI]: https://datatracker.ietf.org/wg/spki/about/
 [SPKI]: https://theworld.com/~cme/html/spki.html
