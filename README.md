@@ -179,11 +179,67 @@ Revocations MAY be deleted once the UCAN that they reference expires or otherwis
 
 A revocation store MUST keep UCAN revocations for UCANs that are otherwise still valid. For example, expired UCANs are already invalid, so a revocation MUST NOT affect this invalid status. Such revocations are redundant, and MAY be evicted from the store.
 
-# 3 Expiry
+## 3.3 Expiry
 
-Revocations MUST NOT expire. If a Revocation was issued in error, 
+Revocations MUST NOT expire.
 
-# 4 Action
+## 3.4 Monotonicity
+
+Since Revocations MUST NOT be reverable, a new Delegation SHOULD be issued if a Revocation was issued in error.
+
+``` mermaid
+flowchart LR
+    Alice -->|delegates| Bob -.-x|d̶e̶l̶e̶g̶a̶t̶e̶s̶| Carol -->|delegates| Dan
+    Alice -->|REVOKES| Carol
+    Alice -->|"delegates (new CID)"| Carol
+```
+
+# 4 Delegation Ability
+
+The authority to revoke some Delegation MAY be itself delegated to a Principal not in the delegation chain. This is a normal delegation:
+
+``` js
+{
+  "iss": "did:web:alice.example.com",
+  "aud": "did:web:zelda.example.com",
+  "sub": "did:web:alice.example.com",
+  "can": "ucan/revoke",
+  "iff": [
+    {"rev": {"/": "bafkreiem4on23qnu2nn2jg7vwzxkns6sxi5faysq7ekwtjhugqga3vbhim"}}
+  ],
+  // ...
+}
+```
+
+``` mermaid
+flowchart LR
+    Alice((&nbsp;&nbsp;&nbsp;Alice&nbsp;&nbsp;&nbsp;))
+    Bob((&nbsp;&nbsp;&nbsp;Bob&nbsp;&nbsp;&nbsp;))
+    Carol((&nbsp;&nbsp;&nbsp;Carol&nbsp;&nbsp;&nbsp;))
+    Dan((&nbsp;&nbsp;&nbsp;Dan&nbsp;&nbsp;&nbsp;))
+    Zelda((&nbsp;&nbsp;&nbsp;Zelda&nbsp;&nbsp;&nbsp;))
+
+    del1{{Delegate\ncan: crud/read Alice's DB}}
+    del2{{Delegate\ncan: crud/read Alice's DB}}
+    del3{{Delegate\ncan: crud/read Alice's DB}}
+
+    delRev{{Delegate\ncan: ucan/revoke}}
+
+    Alice --- del1 --> Bob --- del2 --> Carol --- del3 --> Dan
+    Alice --- delRev --> Zelda
+    delRev -.->|cid| del2
+
+    rev>Invoke!\nRevoke Dan]
+    Zelda --- rev:::Invocation ---> Dan
+    rev -...->|prf| delRev
+
+    classDef Invocation stroke:#F00,fill:#F00,color:#000;
+    linkStyle 9 stroke:red
+    linkStyle 10 stroke:red
+```
+
+
+# 5 Invocation Action
 
 FIXME show delegation
 
@@ -259,24 +315,6 @@ We want to especially recognize [Mark Miller] for his numerous contributions to 
 
 # 6. Acknowledgments
 
-Thank you to [Brendan O'Brien] for real-world feedback, technical collaboration, and implementing the first Golang UCAN library.
-
-Many thanks to [Hugo Dias], [Mikael Rogers], and the entire DAG House team for the real world feedback, and finding inventive new use cases.
-
-Thank you [Blaine Cook] for the real-world feedback, ideas on future features, and lessons from other auth standards.
-
-Many thanks to [Brian Ginsburg] and [Steven Vandevelde] for their many copy edits, feedback from real world usage, maintenance of the TypeScript implementation, and tools such as [ucan.xyz].
-
-Many thanks to [Christopher Joel] for his real-world feedback, raising many pragmatic considerations, and the Rust implementation and related crates.
-
-Many thanks to [Christine Lemmer-Webber] for her handwritten(!) feedback on the design of UCAN, spearheading the [OCapN] initiative, and her related work on [ZCAP-LD].
-
-Thanks to [Benjamin Goering] for the many community threads and connections to [W3C] standards.
-
-Thanks to [Juan Caballero] for the numerous questions, clarifications, and general advice on putting together a comprehensible spec.
-
-Thank you [Dan Finlay] for being sufficiently passionate about [OCAP] that we realized that capability systems had a real chance of adoption in an ACL-dominated world.
-
 Thanks to the entire [SPKI WG][SPKI/SDSI] for their closely related pioneering work.
 
 Many thanks to [Alan Karp] for sharing his vast experience with capability-based authorization, patterns, and many right words for us to search for.
@@ -285,18 +323,7 @@ We want to especially recognize [Mark Miller] for his numerous contributions to 
 
 <!-- Footnotes -->
 
-[^js-num-size]: JavaScript has a single numeric type ([`Number`][JS Number]) for both integers and floats. This representation is defined as a [IEEE-754] double-precision floating point number, which has a 53-bit significand.
-
 <!-- Internal Links -->
-
-[Ability]: #43-ability
-[Caveat]: #44-caveats
-[Envelope]: #2-delegation-envelope
-[Meta]: #35-meta
-[Payload]: #3-delegation-payload
-[Subject]: #41-subject
-[True Caveat]: #441-the-true-caveat
-[Wildcard Ability]: #4312--aka-wildcard
 
 <!-- External Links -->
 
@@ -310,6 +337,7 @@ We want to especially recognize [Mark Miller] for his numerous contributions to 
 [CIDv1]: https://github.com/multiformats/cid?tab=readme-ov-file#cidv1
 [Christine Lemmer-Webber]: https://github.com/cwebber
 [Christopher Joel]: https://github.com/cdata
+[Command]: https://github.com/ucan-wg/spec#33-command
 [DAG-CBOR]: https://ipld.io/specs/codecs/dag-cbor/spec/
 [DID fragment]: https://www.w3.org/TR/did-core/#terminology
 [DID]: https://www.w3.org/TR/did-core/
@@ -332,7 +360,6 @@ We want to especially recognize [Mark Miller] for his numerous contributions to 
 [Mikael Rogers]: https://github.com/mikeal/
 [OCAP]: https://en.wikipedia.org/wiki/Object-capability_model
 [OCapN]: https://github.com/ocapn/
-[Command]: https://github.com/ucan-wg/spec#33-command
 [Philipp Krüger]: https://github.com/matheus23
 [PoLA]: https://en.wikipedia.org/wiki/Principle_of_least_privilege
 [Protocol Labs]: https://protocol.ai/
@@ -344,6 +371,7 @@ We want to especially recognize [Mark Miller] for his numerous contributions to 
 [SPKI/SDSI]: https://datatracker.ietf.org/wg/spki/about/
 [SPKI]: https://theworld.com/~cme/html/spki.html
 [Steven Vandevelde]: https://github.com/icidasset
+[UCAN Delegation]: https://github.com/ucan-wg/delegation
 [UCAN Invocation]: https://github.com/ucan-wg/invocation
 [UCAN]: https://github.com/ucan-wg/spec
 [W3C]: https://www.w3.org/
@@ -359,108 +387,3 @@ We want to especially recognize [Mark Miller] for his numerous contributions to 
 [external resource]: https://github.com/ucan-wg/spec#55-wrapping-existing-systems
 [revocation]: https://github.com/ucan-wg/revocation
 [ucan.xyz]: https://ucan.xyz
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# UCAN Revocation Specification 1.0.0-rc.1
-
-
-
-
-
-
-
-
-
-> The discussion talks about zAlice, and Alice delegating revoke permission to any UCAN she has created.  That's a useful feature, but one that needs to be tightly controlled, e.g., don't delegate to Mallory.  I'm sure people in this discussion know that Alice can have many keys,  which means she can control who can revoke subsets of the UCANs she creates by using a different key for each subset.  As a result, the damage that can happen if Bob delegates to Mallory is controllable.  I'm just making this point explicit because I've been in discussions that rabbit holed because people got into the mode of a single key per person.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# 1 Introduction
-
-
-
-<!-- Internal Links -->
-
-[eviction]: #32-eviction
-[revocation stores]: #3-store
-
-<!-- External Links -->
-
-[ACL]: https://en.wikipedia.org/wiki/Access-control_list
-[Alan Karp]: https://github.com/alanhkarp
-[BCP 14]: https://www.rfc-editor.org/info/bcp14
-[Benjamin Goering]: https://github.com/gobengo
-[Blaine Cook]: https://github.com/blaine
-[Bluesky]: https://blueskyweb.xyz/
-[Brooklyn Zelenka]: https://github.com/expede 
-[CIDv1]: https://docs.ipfs.io/concepts/content-addressing/#identifier-formats
-[CRDT]: https://en.wikipedia.org/wiki/Conflict-free_replicated_data_type
-[Cert Revocation Wikipedia]: https://en.wikipedia.org/wiki/Certificate_revocation_list
-[Christine Lemmer-Webber]: https://github.com/cwebber
-[DID]: https://www.w3.org/TR/did-core/
-[Daniel Holmgren]: https://github.com/dholms
-[E-lang]: http://erights.org/elang/
-[Fission]: https://fission.codes
-[Git]: https://git-scm.com/
-[Irakli Gozalishvili]: https://github.com/Gozala
-[Juan Caballero]: https://github.com/bumblefudge
-[Mark Miller]: https://github.com/erights
-[OCAP]: http://erights.org/elib/capability/index.html
-[OCapN]: https://github.com/ocapn/ocapn
-[POLA]: https://en.wikipedia.org/wiki/Principle_of_least_privilege
-[Philipp Krüger]: https://github.com/matheus23
-[Protocol Labs]: https://protocol.ai/
-[RFC 4648]: https://www.rfc-editor.org/rfc/rfc4648.html
-[RFC 5280]: https://www.rfc-editor.org/rfc/rfc5280
-[RFC 7009]: https://datatracker.ietf.org/doc/html/rfc7009
-[Robust Composition]: https://jscholarship.library.jhu.edu/bitstream/handle/1774.2/873/markm-thesis.pdf?page=100
-[SPKI/SDSI]: https://datatracker.ietf.org/wg/spki/about/
-[Semver]: https://semver.org/
-[VC Revocation]: https://w3c-ccg.github.io/vc-status-rl-2020/
-[W3C]: https://www.w3.org/
-[ZCAP-LD]: https://w3c-ccg.github.io/zcap-spec/
-[block lists]: https://en.wikipedia.org/w/index.php?title=Block_list&redirect=no
-[canonical CID]: https://github.com/ucan-wg/spec/blob/d5a844cceff569838881c7fa30ff4bfad338e771/README.md?plain=1#L800-L807
-[fail-stop]: https://en.wikipedia.org/wiki/Fail-stop
-[local-first]: https://www.inkandswitch.com/local-first/
