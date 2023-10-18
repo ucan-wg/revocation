@@ -112,7 +112,7 @@ _Revocations MUST be immutable and irreversible._ Recipients of revocations SHOU
 
 ## 3.1 Scope 
 
-An Issuer of a particaular Delegation in a proof chain MAY revoke that Delegation. Note that this is not always the same as revoking the Delegation they they Issued; any UCAN that contains a proof where the revoker matches the `iss` field — even transitively in the delegation chain — MAY be revoked.
+An Issuer of a particular Delegation in a proof chain MAY revoke that Delegation. Note that this is not always the same as revoking the Delegation they they Issued; any UCAN that contains a proof where the revoker matches the `iss` field — even transitively in the delegation chain — MAY be revoked.
 
 Revocation of a particular proof does not guarantee that the Agent can no longer access to the capability in question. If an Agent is able to construct a valid proof chain without relying on the revoked proof, they still have access to the capability. By real-world analogy, if Mallory has two tickets to a film, and one of them is invalidated by its serial number, she is still able to present the valid ticket to see the film.
 
@@ -190,7 +190,7 @@ For eventually consistent data structures, this MAY be achieved by including the
 
 ## 4.2 Monotonicity
 
-Since Revocations MUST NOT be reverable, a new Delegation SHOULD be issued if a Revocation was issued in error.
+Since Revocations MUST NOT be reversable, a new Delegation SHOULD be issued if a Revocation was issued in error.
 
 ``` mermaid
 flowchart LR

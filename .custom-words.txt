@@ -93,6 +93,7 @@ auth
 autonumber
 bene
 blockchain
+cacheable
 codec
 codecs
 const
