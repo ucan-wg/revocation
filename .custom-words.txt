@@ -25,6 +25,7 @@ DIDs
 DNS
 DNSLinks
 Datalog
+DoS
 ECDSA
 EdDSA
 GLVVQR
@@ -33,6 +34,7 @@ Gozalishvili
 HEHYSF
 Haus
 Holmgren
+IPLD
 Irakli
 JSON
 JWT
@@ -45,12 +47,14 @@ Memoized
 Merkle
 Mikael
 MkiTBz
+Monotonicity
 OAuth
 OCAP
 OCapN
 PITM
 PKI
 Philipp
+Pseudocode
 RESTful
 RL
 RSA
@@ -79,6 +83,7 @@ WG
 WebNative
 Webber
 ZCAP
+Zelda
 Zelenka
 adoptability
 alice
@@ -90,12 +95,14 @@ bene
 blockchain
 codec
 codecs
+const
 crudGraph
 cryptographically
 del
 delegable
 delegatee
 delegator
+delegators
 dereference
 disambiguates
 disjunct
@@ -105,6 +112,7 @@ enums
 extractable
 filesystem
 fooey
+forEach
 hawaii
 init
 inlining
@@ -127,6 +135,16 @@ namespace
 namespaced
 namespaces
 naud
+nbsp
+nbsp
+nbspAlice
+nbspAlice
+nbspBob
+nbspBob
+nbspCarol
+nbspDan
+nbspDan
+nbspZelda
 ncap
 niss
 nota
@@ -135,6 +153,8 @@ plaintext
 potencies
 pre
 preimages
+prf
+priori
 quG
 rc
 reauthorizations

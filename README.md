@@ -307,7 +307,7 @@ Being expressed as an Invocation means that Revocations MUST define an Action ty
 
 ### 6.1.1 Path Witness
 
-Since all delegation chains MUST be rooted in a Delegation where the `iss` and `sub` fields are equal, the root Issuer is a priori in every delegation chain. This is not the case for sub-delegation. There are many paths through the authority network. For exmaple, take the following delegation network:
+Since all delegation chains MUST be rooted in a Delegation where the `iss` and `sub` fields are equal, the root Issuer is a priori in every delegation chain. This is not the case for sub-delegation. There are many paths through the authority network. For example, take the following delegation network:
 
 ``` mermaid
 flowchart LR
@@ -316,7 +316,7 @@ flowchart LR
     Alice -->|delegates| Mallory
 ```
 
-Mallory is not in the delegation chain of Erin. This is fine, since the semantics of revocation merely state that she would assert that no delegation of hers may be used in the `prf` field of an Invocation if it also includes the `rev` Delegation. However, issuing spurious Revocations and requiring them to be stored is a potential DoS vector. Executors MAY require a delegation path witness be included to avoid this situaton.
+Mallory is not in the delegation chain of Erin. This is fine, since the semantics of revocation merely state that she would assert that no delegation of hers may be used in the `prf` field of an Invocation if it also includes the `rev` Delegation. However, issuing spurious Revocations and requiring them to be stored is a potential DoS vector. Executors MAY require a delegation path witness be included to avoid this situation.
  
 Unlike Mallory, Bob, Carol, and Dan can both provide valid delegation paths that include Delegations that they have issued. Bob has two paths (`Alice -> Bob -> Dan -> Erin` or `Alice -> Bob -> Carol -> Erin`), and either will suffice.
 
