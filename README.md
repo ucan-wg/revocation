@@ -199,11 +199,12 @@ flowchart LR
     del3{{Delegate\ncan: crud/read Alice's DB}}
     newDel{{"Delegate\ncan: crud/read Alice's DB\n(Resissued) "}}
 
-    Alice --- del1 --> Bob -.- del2:::Revoked -.-x Carol --- del3 --> Dan
-    Alice --- newDel:::Reissued ---> Carol
+    Alice === del1 ==> Bob === del2:::Revoked ===x Carol === del3 ==> Dan
+    Alice === newDel:::Reissued ===> Carol
 
     rev>Revoke!]
-    Alice --- rev:::Invocation ---> del2
+    Alice === rev:::Invocation
+    rev -.->|rev| del2
 
     classDef Invocation stroke:#F00,fill:#F00,color:#000;
     classDef Revoked stroke:#F00;
@@ -250,12 +251,13 @@ flowchart LR
 
     delRev{{Delegate\ncan: ucan/revoke}}
 
-    Alice --- del1 --> Bob --- del2 --> Carol -.- del3 -.-x Dan
-    Alice --- delRev --> Zelda
+    Alice === del1 ==> Bob === del2 ===> Carol === del3 ===x Dan
+    Alice === delRev ===> Zelda
     delRev -.->|cid| del2
 
     rev>Revoke]
-    Zelda --- rev:::Invocation ---> del3
+    Zelda === rev:::Invocation ===> Alice
+    rev:::Invocation -.->|rev| del3
 
     classDef Revoked stroke:#F00;
     classDef Invocation stroke:#F00,fill:#F00,color:#000;
