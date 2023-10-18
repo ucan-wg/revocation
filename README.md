@@ -168,10 +168,15 @@ const delegators = invocation.prf.map(proof => proof.iss)
 invocation.prf.forEach(delegation => {
   // Is the proof in the revocation store?
   store.lookup(delegation).then(revocation => {
-
     // Is the revocation issuer in this proof chain?
     if (delegators.includes(revocation.iss)) {
-      throw new Error("Revoked")
+      throw new Error("Invalidated via revocation by delegation issuer")
+    }
+    
+    // Is the revocation based on a delegated revocation?
+    const cids = revocation.iff.filter(cav => !!cav.rev)
+    if (cids.length === 1 && invocation.prf.includes(cids[0])) {
+      throw new Error("Invalidated by delegated revocation")
     }
   })
 })
@@ -226,7 +231,14 @@ Revocations MAY be evicted once the UCAN that they reference expires or otherwis
 
 # 5 Delegating Revocation
 
-The authority to revoke some Delegation MAY be itself delegated to a Principal not in the delegation chain. This is a normal delegation:
+The authority to revoke some Delegation MAY be itself delegated to a Principal not in the delegation chain.
+
+| Field | Value                    |
+|-------|--------------------------|
+| `can` | `"ucan/revoke"`          |
+| `iff` | `[{"rev": &Delegation}]` |
+
+This is a Delegation of the ability to Revoke:
 
 ``` js
 {
@@ -271,7 +283,6 @@ flowchart LR
     linkStyle 9 stroke:red
     linkStyle 10 stroke:red
 ```
-
 
 # 6 Invoking Revocation
 
