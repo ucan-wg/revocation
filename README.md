@@ -19,7 +19,7 @@
 
 ## Language
 
-The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in [RFC 2119].
+The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in [BCP 14] when, and only when, they appear in all capitals, as shown here.
 
 # 0. Abstract
 
@@ -35,7 +35,7 @@ Even when not in error at time of issuance, the trust relationship between a del
 
 UCAN delegation is designed to be [local-first], partition-tolerant, cacheable, and latency-reducing. As such, [fail-safe] approaches are not suitable. Revocation is accomplished by delivery of an unforgeable message from a previous delegator.
 
-UCAN Revocations are similar to [block lists]: they identify delegation paths that are retracted and no longer suitable for use. Revocation SHOULD be considered the last line of defense against abuse. Proactive expiry through time bounds or other constraints SHOULD be preferred, as they do not require learning more information than what would be available on an offline computer.
+UCAN Revocations are similar to [block list]s: they identify delegation paths that are retracted and no longer suitable for use. Revocation SHOULD be considered the last line of defense against abuse. Proactive expiry through time bounds or other constraints SHOULD be preferred, as they do not require learning more information than what would be available on an offline computer.
 
 UCAN Revocation is a mechanism for invalidating a particular Delegation when used in conjunction with another Delegation in an Invocation proof chain. This is conceptually recursive, and more easily described in pictures:
 
@@ -334,7 +334,7 @@ Unlike Mallory, Bob, Carol, and Dan can both provide valid delegation paths that
 
 While strictly speaking being about assertions rather than capabilities, [Verfiable Credential Revocation][VC Revocation] spec follows a similar pattern to those listed above.
 
-[E][E-lang]-style [object capabilities][Robust Composition] use active network connections with [proxy agents][Robust Composition] to revoke delegations. Revocation is achieved by shutting down that proxy to break the authorizing reference. In many ways, UCAN Revocation attempts to emulate this behavior. Unlike UCAN Revocations, E-style object capabilities are [fail-safe] and thus by definition not partition tolerant.
+[E][E-lang]-style [object capabilities] use active network connections with [proxy agents][Robust Composition] to revoke delegations. Revocation is achieved by shutting down that proxy to break the authorizing reference. In many ways, UCAN Revocation attempts to emulate this behavior. Unlike UCAN Revocations, E-style object capabilities are [fail-safe] and thus by definition not partition tolerant.
 
 # 8 Acknowledgements
 
@@ -370,6 +370,7 @@ We want to especially recognize [Mark Miller] for his numerous contributions to 
 
 <!-- External Links -->
 
+[Robust Composition]: http://www.erights.org/talks/thesis/markm-thesis.pdf
 [ACL]: https://en.wikipedia.org/wiki/Access-control_list
 [Alan Karp]: https://github.com/alanhkarp
 [Benjamin Goering]: https://github.com/gobengo
