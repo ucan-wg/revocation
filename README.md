@@ -161,7 +161,7 @@ The Agent that controls a resource MUST maintain a cache of Revocations for whic
 
 During validation of a UCAN delegation chain, the [canonical CID] of each UCAN delegation MUST be checked against the cache. If there's a match, the relevant Delegation MUST be ignored. Note that this MAY NOT invalidate the entire UCAN chain.
 
-``` json
+``` js
 // Pseudocode
 
 const proofs = invocation.prf
