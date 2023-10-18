@@ -125,17 +125,17 @@ flowchart TB
     subgraph RA[Alice can revoke]
         direction RL
         
-        AB["(Root)\niss: Alice\naud: Bob\ncap:[X,Y,Z]"]
+        AB["(Root)\niss: Alice\naud: Bob\niff[X,Y,Z]"]
 
         subgraph RB[Bob can revoke]
-            BC["iss: Bob\naud: Carol\ncap: [X,Y]"]
-            BD["iss: Bob\naud: Dan\ncap:[Y,Z]"]
+            BC["iss: Bob\naud: Carol\niff [X,Y]"]
+            BD["iss: Bob\naud: Dan\niff[Y,Z]"]
 
             subgraph RC[Carol can revoke]
-                CD["iss: Carol\naud: Dan\ncap:[X,Y]"]
+                CD["iss: Carol\naud: Dan\niff[X,Y]"]
 
                 subgraph RD[Dan can revoke]
-                    DE["iss: Dan\naud: Erin\ncap:[X,Y,Z]"]
+                    DE["iss: Dan\naud: Erin\niff[X,Y,Z]"]
                 end
             end
         end
@@ -179,47 +179,88 @@ Revocations MAY be deleted once the UCAN that they reference expires or otherwis
 
 A revocation store MUST keep UCAN revocations for UCANs that are otherwise still valid. For example, expired UCANs are already invalid, so a revocation MUST NOT affect this invalid status. Such revocations are redundant, and MAY be evicted from the store.
 
-# 4 Format
+# 3 Expiry
 
-A revocation message MUST contain the following information:
+FIXME Note on expiry
 
-| Field | Type                               | Description                                                | Required |
-|-------|------------------------------------|------------------------------------------------------------|----------|
-| `urv` | [Semver] string                    | Version of UCAN Revocation (`1.0.0-rc.1`)                  | Yes      |
-| `iss` | [DID]                              | Revoker DID                                                | Yes      |
-| `rvk` | [CIDv1]                            | The [canonical CID] of the UCAN being revoked              | Yes      |
-| `sig` | [base64-unpadded][RFC 4648] string | The base64 encoded signature of `` `REVOKE-UCAN:${rvk}` `` | Yes      |
+# 4 Action
+
+FIXME show delegation
+
+A revocation Action MUST take the following shape:
+
+| Field | Value           |
+|-------|-----------------|
+| `cmd` | `"ucan/revoke"` |
+| `arg` | See [Arguments] |
+| `nnc` | `""`            |
+
+Note that per [UCAN Invocation], the `nnc` field SHOULD is set to `""` since revocation is idempotent.
+
+## 4.1 Arguments
+
+Being expressed as an Invocation means that Revocations MUST define an Action type for the command `ucan/revoke`.
+
+| Field | Type            | Required | Description                                                                           |
+|-------|-----------------|----------|---------------------------------------------------------------------------------------|
+| `rev` | `&Delegation`   | Yes      | The [UCAN Delegation] that is being revoked                                           |
+| `pth` | `[&Delegation]` | No       | [Proof of delegation path] from a delegation by the Revoker to the revoked Delegation |
+
+### 4.1.1 Revoked Delegation
+
+The target delegation MUST be referenced by its CID.
+
+### 4.1.2 Path Witness
+
+Since all delegation chains MUST be rooted in a Delegation where the `iss` and `sub` fields are equal, the root Issuer is a priori in every delegation chain. This is not the case for sub-delegation. There are many paths through the authority network. For exmaple, take the following delegation network:
+
+``` mermaid
+flowchart LR
+    Alice -->|delegates| Bob -->|delegates| Dan -->|delegates| Erin
+    Bob -->|delegates| Carol -->|delegates| Erin
+    Alice -->|delegates| Mallory
+```
+
+Mallory is not in the delegation chain of Erin. This is fine, since the semantics of revocation merely state that she would assert that no delegation of hers may be used in the `prf` field of an Invocation if it also includes the `rev` Delegation. However, issuing spurious Revocations and requiring them to be stored is a potential DoS vector. Executors MAY require a delegation path witness be included to avoid this situaton.
+ 
+Unlike Mallory, Bob, Carol, and Dan can both provide valid delegation paths that include Delegations that they have issued. Bob has two paths (`Bob -> Dan -> Erin` or `Bob -> Carol -> Erin`), but either will suffice.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 Revocations MAY be gossiped between systems. As such, they need to be parsable by a wide number of languages and contexts. To accommodate this, compliant UCAN revocations MUST be JSON-encoded.
 
-## 4.1 `urv` UCAN Revocation Version
 
-The UCAN Revocation Version, i.e. the version of this document: `1.0.0-rc.1`.
 
-## 4.2 `iss` Revocation Issuer
 
-The issuer DID of this revocation. This DID MUST match one or more `iss` fields in the proof chain of the UCAN listed in the `rvk` field. This DID MUST also validate against the signature in the `sig` field.
 
-## 4.3 `rvk` Revoked UCAN
 
-The `rvk` field MUST contain the [canonical CID] for the UCAN delegation being revoked. The target UCAN MUST contain a (potentially nested) UCAN proof where the `iss` field matches the `iss` field of this revocation. 
 
-Note that this revocation MUST only revoke the particular capabilities from the relevant proof(s). The resultant proof chain MUST be treated as if that proof were not present, with no other changes.
 
-## 4.4 `sig` Prefixed Signature
 
-The `sig` field MUST contain a signature that validates against the revoker's DID. The format to sign over MUST be prefixed with the UTF-8 string `REVOKE-UCAN:`, followed by the CID from the `rvk` field. Note that the prefix contains no spaces.
 
-## 4.5 Example
 
-``` json
-{
-  "urv": "1.0.0-rc.1",
-  "iss": "did:key:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnEGta2doK",
-  "rvk": "bafkreia7l6bthgtpaaw4qbfacun6p4rt5rcorsognxgojvkyvhlmo7kf4a",
-  "sig": "FJi1Rnpj3/otydngacrwddFvwz/dTDsBv62uZDN2fZM"
-}
-```
+
+
+
+
+
+
 
 # 5 Prior Art
 
