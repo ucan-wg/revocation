@@ -189,9 +189,34 @@ Since Revocations MUST NOT be reverable, a new Delegation SHOULD be issued if a 
 
 ``` mermaid
 flowchart LR
-    Alice -->|delegates| Bob -.-x|d̶e̶l̶e̶g̶a̶t̶e̶s̶| Carol -->|delegates| Dan
-    Alice -->|REVOKES| Carol
-    Alice -->|"delegates (new CID)"| Carol
+    Alice((&nbsp&nbsp&nbspAlice&nbsp&nbsp&nbsp))
+    Bob((&nbsp&nbsp&nbspBob&nbsp&nbsp&nbsp))
+    Carol((&nbsp&nbsp&nbspCarol&nbsp&nbsp&nbsp))
+    Dan((&nbsp&nbsp&nbspDan&nbsp&nbsp&nbsp))
+
+    del1{{Delegate\ncan: crud/read Alice's DB}}
+    del2{{Delegate\ncan: crud/read Alice's DB}}
+    del3{{Delegate\ncan: crud/read Alice's DB}}
+    newDel{{"Delegate\ncan: crud/read Alice's DB\n(Resissued) "}}
+
+    Alice --- del1 --> Bob -.- del2:::Revoked -.-x Carol --- del3 --> Dan
+    Alice --- newDel:::Reissued ---> Carol
+
+    rev>Revoke!]
+    Alice --- rev:::Invocation ---> del2
+
+    classDef Invocation stroke:#F00,fill:#F00,color:#000;
+    classDef Revoked stroke:#F00;
+    classDef Reissued stroke:green;
+
+    linkStyle 2 stroke:red
+    linkStyle 3 stroke:red
+
+    linkStyle 8 stroke:red
+    linkStyle 9 stroke:red
+
+    linkStyle 6 stroke:green
+    linkStyle 7 stroke:green
 ```
 
 # 4 Delegation Ability
@@ -213,27 +238,30 @@ The authority to revoke some Delegation MAY be itself delegated to a Principal n
 
 ``` mermaid
 flowchart LR
-    Alice((&nbsp;&nbsp;&nbsp;Alice&nbsp;&nbsp;&nbsp;))
-    Bob((&nbsp;&nbsp;&nbsp;Bob&nbsp;&nbsp;&nbsp;))
-    Carol((&nbsp;&nbsp;&nbsp;Carol&nbsp;&nbsp;&nbsp;))
-    Dan((&nbsp;&nbsp;&nbsp;Dan&nbsp;&nbsp;&nbsp;))
-    Zelda((&nbsp;&nbsp;&nbsp;Zelda&nbsp;&nbsp;&nbsp;))
+    Alice((&nbsp&nbsp&nbspAlice&nbsp&nbsp&nbsp))
+    Bob((&nbsp&nbsp&nbspBob&nbsp&nbsp&nbsp))
+    Carol((&nbsp&nbsp&nbspCarol&nbsp&nbsp&nbsp))
+    Dan((&nbsp&nbsp&nbspDan&nbsp&nbsp&nbsp))
+    Zelda((&nbsp&nbsp&nbspZelda&nbsp&nbsp&nbsp))
 
     del1{{Delegate\ncan: crud/read Alice's DB}}
     del2{{Delegate\ncan: crud/read Alice's DB}}
-    del3{{Delegate\ncan: crud/read Alice's DB}}
+    del3{{Delegate\ncan: crud/read Alice's DB}}:::Revoked
 
     delRev{{Delegate\ncan: ucan/revoke}}
 
-    Alice --- del1 --> Bob --- del2 --> Carol --- del3 --> Dan
+    Alice --- del1 --> Bob --- del2 --> Carol -.- del3 -.-x Dan
     Alice --- delRev --> Zelda
     delRev -.->|cid| del2
 
-    rev>Invoke!\nRevoke Dan]
-    Zelda --- rev:::Invocation ---> Dan
-    rev -...->|prf| delRev
+    rev>Revoke]
+    Zelda --- rev:::Invocation ---> del3
 
+    classDef Revoked stroke:#F00;
     classDef Invocation stroke:#F00,fill:#F00,color:#000;
+
+    linkStyle 4 stroke:red
+    linkStyle 5 stroke:red
     linkStyle 9 stroke:red
     linkStyle 10 stroke:red
 ```
