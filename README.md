@@ -23,23 +23,21 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 
 # 0. Abstract
 
-This specification defines the semantics of revoking a [UCAN Delegation], and the ability to delegate such the ability to revoke a capability separately from the capability.
+This specification defines the syntax and semantics of revoking a [UCAN Delegation], and the ability to delegate this ability to others.
 
 # 1. Introduction
 
-Using the [principle of least authority][POLA] such as certificate expiry and reduced capability scope SHOULD be the preferred method for securing a UCAN, but does not cover every situation. Revocation is a manual method for reversing a delegation. It is not a perfect method, and cannot undo irreversible actions already performed with capability, but MAY limit misuse going forward.
+Using the [principle of least authority][POLA] such as certificate expiry and reduced capability scope SHOULD be the preferred method for securing a UCAN, but does not cover every situation. Revocation is a manual method for reversing a delegation. It cannot undo irreversible mutations (such as sending an email), but MAY limit misuse going forward. Revocation is the act of invalidating a UCAN after the fact, outside of the limitations placed on it by the UCAN's fields (such as its expiry). 
 
-## 1.1 Motivation
+Even when not in error at time of issuance, the trust relationship between a delegator and delegatee is not immutable. An agent can go rogue, keys can be compromised, and the privacy requirements of resources can (will!) change. While the UCAN Delegation approach RECOMMENDS using the [principle of least authority][POLA], unexpected conditions that require manual intervention do arise. These are exceptional cases, but are sufficiently important that a well defined method for performing revocation is nearly always desired in token and certificate systems.
 
-Even when not in error at time of issuance, the trust relationship between a delegator and delegatee is not immutable. An agent can go rogue, keys can be compromised, and the privacy requirements of resources can change. While the UCAN delegation approach RECOMMENDS using the [principle of least authority][POLA], such unexpected conditions can and do arise. These are exceptional cases, but are sufficiently important that a well defined method for performing revocation is nearly always desired. Revocation is the act of invalidating a UCAN after the fact, outside of the limitations placed on it by the UCAN's fields (such as its expiry). 
+## 1.1 Approach
 
-## 1.2 Approach
+UCAN delegation is designed to be [local-first], partition-tolerant, cacheable, and latency-reducing. As such, [fail-stop] approaches are not suitable. Revocation is accomplished by delivery of an unforgeable message from a previous delegator.
 
-UCAN delegation is designed to be [local-first]. As such, [fail-stop] approaches are not suitable. Revocation is accomplished by delivery of an unforgeable message from a previous delegator.
+UCAN Revocations are similar to [block lists]: they identify delegation paths that are retracted and no longer suitable for use. Revocation SHOULD be considered the last line of defense against abuse. Proactive expiry through time bounds or other constraints SHOULD be preferred, as they do not require learning more information than what would be available on an offline computer.
 
-UCAN Revocations are similar to [block lists]: they identify delegations that are retracted and no longer suitable for use. Revocation SHOULD be considered the last line of defense against abuse. Proactive expiry through time bounds or other constraints SHOULD be preferred, as they do not require learning more information than what would be available on an offline computer.
-
-A UCAN Revocation is a mechanism for invalidating a particular Delegation when used in conjunction with another Delegation in an Invocation proof chain. This is a second-order reference, and is described in the following diagram:
+UCAN Revocation is a mechanism for invalidating a particular Delegation when used in conjunction with another Delegation in an Invocation proof chain. This is conceptually recursive, and more easily described in pictures:
 
 ``` mermaid
 flowchart RL
@@ -271,8 +269,6 @@ flowchart LR
 
 # 5 Invocation Action
 
-FIXME show delegation
-
 A revocation Action MUST take the following shape:
 
 | Field | Value           |
@@ -289,14 +285,10 @@ Being expressed as an Invocation means that Revocations MUST define an Action ty
 
 | Field | Type            | Required | Description                                                              |
 |-------|-----------------|----------|--------------------------------------------------------------------------|
-| `rev` | `&Delegation`   | Yes      | The [UCAN Delegation] that is being revoked                              |
+| `rev` | `&Delegation`   | Yes      | The CID of the [UCAN Delegation] that is being revoked                   |
 | `pth` | `[&Delegation]` | No       | [A delegation path] that includes the Revoker and the revoked Delegation |
 
-### 4.1.1 Revoked Delegation
-
-The target delegation MUST be referenced by its CID.
-
-### 4.1.2 Path Witness
+### 4.1.1 Path Witness
 
 Since all delegation chains MUST be rooted in a Delegation where the `iss` and `sub` fields are equal, the root Issuer is a priori in every delegation chain. This is not the case for sub-delegation. There are many paths through the authority network. For exmaple, take the following delegation network:
 
