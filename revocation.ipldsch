@@ -1,0 +1,10 @@
+type RevocationAction <: Action {
+  cmd "ucan/revoke"
+  nnc ""
+  arg RevocationArguments
+}
+
+type RevocationArguments struct {
+  rev &Delegation
+  pth [&Delegation]
+}
