@@ -382,14 +382,6 @@ Thanks to the entire [SPKI WG][SPKI/SDSI] for their closely related pioneering w
 
 We want to especially recognize [Mark Miller] for his numerous contributions to the field of distributed auth, programming languages, and computer security writ large.
 
-# Acknowledgments
-
-Thanks to the entire [SPKI WG][SPKI/SDSI] for their closely related pioneering work.
-
-Many thanks to [Alan Karp] for sharing his vast experience with capability-based authorization, patterns, and many right words for us to search for.
-
-We want to especially recognize [Mark Miller] for his numerous contributions to the field of distributed auth, programming languages, and computer security writ large.
-
 <!-- Footnotes -->
 
 <!-- Internal Links -->
