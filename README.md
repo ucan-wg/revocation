@@ -21,17 +21,17 @@
 
 The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in [BCP 14] when, and only when, they appear in all capitals, as shown here.
 
-# 0. Abstract
+# Abstract
 
 This specification defines the syntax and semantics of revoking a [UCAN Delegation], and the ability to delegate this ability to others.
 
-# 1. Introduction
+# Introduction
 
 Using the [principle of least authority][POLA] such as certificate expiry and reduced capability scope SHOULD be the preferred method for securing a UCAN, but does not cover every situation. Revocation is a manual method for reversing a delegation. It cannot undo irreversible mutations (such as sending an email), but MAY limit misuse going forward. Revocation is the act of invalidating a UCAN after the fact, outside of the limitations placed on it by the UCAN's fields (such as its expiry). 
 
 Even when not in error at time of issuance, the trust relationship between a delegator and delegatee is not immutable. An agent can go rogue, keys can be compromised, and the privacy requirements of resources can (will!) change. While the UCAN Delegation approach recommends following the [principle of least authority][POLA], unexpected conditions that require manual intervention do arise. These are exceptional cases, but are sufficiently important that a well defined method for performing revocation is nearly always desired in token and certificate systems.
 
-# 2 Approach
+# Approach
 
 UCAN delegation is designed to be [local-first], partition-tolerant, cacheable, and latency-reducing. As such, [fail-safe] approaches are not suitable. Revocation is accomplished by delivery of an unforgeable message from a previous delegator.
 
@@ -104,13 +104,13 @@ flowchart RL
     classDef revoked stroke:red,fill:#ff7676,color:red
 ```
 
-# 3 Semantics
+# Semantics
 
 Revocation is the act of invalidating a proof in a delegation chain for some specific UCAN delegation by its CID. All UCAN capabilities are either claimed by direct authority over the Subject, or by delegation chain terminating in that direct ("root") authority. Each link in a delegation chain contains an explicit issuer (delegator) and audience (delegatee).
 
 _Revocations MUST be immutable and irreversible._ Recipients of revocations SHOULD treat them as a monotonically-growing set. If a Revocation was issued in error, it MUST NOT be retracted — a new, unique UCAN delegation MAY be issued (e.g. by updating the nonce or changing the time bounds). This prevents confusion as the revocation moves through the network and makes [revocation store]s append-only and highly amenable to caching and gossip.
 
-## 3.1 Scope 
+## Scope 
 
 An Issuer of a particular Delegation in a proof chain MAY revoke that Delegation. Note that this is not always the same as revoking the Delegation they they Issued; any UCAN that contains a proof where the revoker matches the `iss` field — even transitively in the delegation chain — MAY be revoked.
 
@@ -146,7 +146,7 @@ flowchart TB
 
 Here Alice is the root Issuer. Alice MAY revoke any of the UCANs in the chain, Carol MAY revoke the two innermost, and so on. If the UCAN `Carol -> Dan` is revoked by Alice, Bob, or Carol, then Erin will not have a valid chain for the `X` capability, since its only proof is invalid. However, Erin can still prove the valid capability for `Y` and `Z` since the still-valid ("unbroken") chain `Alice to Bob to Dan to Erin` includes them. Note that despite `Y` being in the revoked `Carol -> Dan` UCAN, it does not invalidate `Y` for Erin, since the unbroken chain also included a proof for `Y`. 
 
-## 3.2 Consistency Model
+## Consistency Model
 
 UCAN revocation is designed to work in the broadest possible scenarios, and as such needs very weak constraints. UCAN revocation MAY operate in fully eventually consistent contexts, with single sources of truth, or among nodes participating in consensus. The format of the revocation does not change in these situations; it is entirely managed by how revocations are passed around the network. 
 Weak assumptions enable UCAN to work with eventually consistent resources, such as [CRDT]s, [Git] forks, delay-tolerant replicated state machines, and so on.
@@ -155,7 +155,7 @@ These weak assumptions are often associated with being unable to guarantee deliv
 
 Out of order delivery is typical of distributed systems. Further, a malicious user can otherwise delay revealing that they have a capability until the last possible moment in hopes of evading detection. Accepting revocations for resources that the agent controls prior to the delegation targeted by the revocation is received is thus RECOMMENDED. 
 
-# 4 Store
+# Store
 
 The Agent that controls a resource MUST maintain a cache of Revocations for which it is the Subject. The Agent MAY additionally cache gossiped Revocations about other Subjects as part of a [store and forward] mechanism.
 
@@ -182,13 +182,13 @@ invocation.prf.forEach(delegation => {
 })
 ```
 
-## 4.1 Locality
+## Locality
 
 Resources with a single source of truth SHOULD follow the typical approach of maintaining a revocation store at the same physical location as the resource. For example, a centralized server MAY have an endpoint that lists the revoked UCANs by [canonical CID].
 
 For eventually consistent data structures, this MAY be achieved by including the store directly inside the resource itself. For example, a CRDT-based file system SHOULD maintain the revocation store directly at a well-known path.
 
-## 4.2 Monotonicity
+## Monotonicity
 
 Since Revocations MUST NOT be reversible, a new Delegation SHOULD be issued if a Revocation was issued in error.
 
@@ -225,18 +225,18 @@ flowchart LR
     linkStyle 7 stroke:green
 ```
 
-## 4.3 Eviction
+## Eviction
 
 Revocations MAY be evicted once the UCAN that they reference expires or otherwise becomes invalid through its proactive mechanisms, such as expiry (`exp`) plus some clock-skew buffer.
 
-# 5 Delegating Revocation
+# Delegating Revocation
 
 The authority to revoke some Delegation MAY be itself delegated to a Principal not in the delegation chain. The revoked Delegation SHOULD be referenced by its [canonical CID].
 
-| Field | Value                    |
-|-------|--------------------------|
-| `can` | `"ucan/revoke"`          |
-| `iff` | `[{"rev": &Delegation}]` |
+| Field  | Value                     |
+|--------|---------------------------|
+| `can`  | `"ucan/revoke"`           |
+| `args` | `{"revoke": &Delegation}` |
 
 This is a Delegation of the ability to Revoke:
 
@@ -244,11 +244,10 @@ This is a Delegation of the ability to Revoke:
 {
   "iss": "did:web:alice.example.com",
   "aud": "did:web:zelda.example.com",
-  "sub": "did:web:alice.example.com",
   "can": "ucan/revoke",
-  "iff": [
-    {"rev": {"/": "bafkreiem4on23qnu2nn2jg7vwzxkns6sxi5faysq7ekwtjhugqga3vbhim"}}
-  ],
+  "args": {
+    "revoke": {"/": "bafkreiem4on23qnu2nn2jg7vwzxkns6sxi5faysq7ekwtjhugqga3vbhim"}
+  },
   // ...
 }
 ```
@@ -284,28 +283,28 @@ flowchart LR
     linkStyle 10 stroke:red
 ```
 
-# 6 Invoking Revocation
+# Invoking Revocation
 
 A revocation Action MUST take the following shape:
 
-| Field | Value           |
-|-------|-----------------|
-| `cmd` | `"ucan/revoke"` |
-| `arg` | See [Arguments] |
-| `nnc` | `""`            |
+| Field   | Value           |
+|---------|-----------------|
+| `do`    | `"ucan/revoke"` |
+| `args`  | See [Arguments] |
+| `nonce` | `""`            |
 
 Note that per [UCAN Invocation], the `nnc` field SHOULD is set to `""` since revocation is idempotent.
 
-## 6.1 Arguments
+## Arguments
 
 Being expressed as an Invocation means that Revocations MUST define an Action type for the command `ucan/revoke`.
 
-| Field | Type            | Required | Description                                                              |
-|-------|-----------------|----------|--------------------------------------------------------------------------|
-| `rev` | `&Delegation`   | Yes      | The CID of the [UCAN Delegation] that is being revoked                   |
-| `pth` | `[&Delegation]` | No       | A [delegation path] that includes the Revoker and the revoked Delegation |
+| Field    | Type            | Required | Description                                                              |
+|----------|-----------------|----------|--------------------------------------------------------------------------|
+| `revoke` | `&Delegation`   | Yes      | The CID of the [UCAN Delegation] that is being revoked                   |
+| `path`   | `[&Delegation]` | No       | A [delegation path] that includes the Revoker and the revoked Delegation |
 
-### 6.1.1 Path Witness
+### Path Witness
 
 Since all delegation chains MUST be rooted in a Delegation where the `iss` and `sub` fields are equal, the root Issuer is a priori in every delegation chain. This is not the case for sub-delegation. There are many paths through the authority network. For example, take the following delegation network:
 
@@ -320,7 +319,38 @@ Mallory is not in the delegation chain of Erin. This is fine, since the semantic
  
 Unlike Mallory, Bob, Carol, and Dan can both provide valid delegation paths that include Delegations that they have issued. Bob has two paths (`Alice -> Bob -> Dan -> Erin` or `Alice -> Bob -> Carol -> Erin`), and either will suffice.
 
-# 7 Prior Art
+### Example
+
+``` js
+// DAG-JSON
+{
+  "s": {"/": {"bytes": "7aEDQIscUKVuAIB2Yj6jdX5ru9OcnQLxLutvHPjeMD3pbtHIoErFpo7OoC79Oe2ShgQMLbo2e6dvHh9scqHKEOmieA0"}},
+  "p": {
+    "h": {"/": {"bytes": "NBIFEgEAcQ"}},
+    "ucan/i/1.0.0-rc.1": {
+      "iss": "did:plc:ewvi7nxzyoun6zhxrhs64oiz",
+      "sub": "did:key:z6MkrZ1r5XBFZjBU34qyD8fueMbMRkKw17BZaq2ivKFjnz2z",
+      "do": "ucan/revoke",
+      "args": {
+        "revoke": {"/": "bafkreictzcfwelyww7zmjkl5nptyot24oilky2bppw42nui2acozhfmzqa"},
+        "path": [
+            {"/": "bafkreic4lzfu6gq6pxonmalbjzjumrs5p47plsolmccaz4qhgmzo24fagu"},
+            {"/": bafkreicc3jmhhtkzv26rb43cfx6ihyjlj2hixdfrkirglrermfo6cduelm""}
+        ]
+      },
+      "nonce": {"/": {"bytes": ""}},
+      "meta": {
+        "comment": "bad behaviour"
+      },
+      "prf": [
+        {"/": "bafkr4idnrqfouibxdqpvh2lmkhgsbw5yabvjbiaea3fplrb4vxifaphvgy"},
+      ]
+    }
+  }
+}
+```
+
+# Prior Art
 
 [Revocation lists][Cert Revocation Wikipedia] are a fairly widely used concept.
 
@@ -336,7 +366,7 @@ While strictly speaking being about assertions rather than capabilities, [Verfia
 
 [E][E-lang]-style [object capabilities] use active network connections with [proxy agents][Robust Composition] to revoke delegations. Revocation is achieved by shutting down that proxy to break the authorizing reference. In many ways, UCAN Revocation attempts to emulate this behavior. Unlike UCAN Revocations, E-style object capabilities are [fail-safe] and thus by definition not partition tolerant.
 
-# 8 Acknowledgements
+# Acknowledgements
 
 Thank you [Blaine Cook] for the real-world feedback, ideas on future features, and lessons from other auth standards.
 
@@ -352,7 +382,7 @@ Thanks to the entire [SPKI WG][SPKI/SDSI] for their closely related pioneering w
 
 We want to especially recognize [Mark Miller] for his numerous contributions to the field of distributed auth, programming languages, and computer security writ large.
 
-# 9. Acknowledgments
+# Acknowledgments
 
 Thanks to the entire [SPKI WG][SPKI/SDSI] for their closely related pioneering work.
 
@@ -364,9 +394,9 @@ We want to especially recognize [Mark Miller] for his numerous contributions to 
 
 <!-- Internal Links -->
 
-[Arguments]: #61-arguments
-[delegation path]: #611-path-witness
-[revocation store]: #4-store
+[Arguments]: #arguments
+[delegation path]: #path-witness
+[revocation store]: #store
 
 <!-- External Links -->
 
