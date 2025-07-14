@@ -326,7 +326,7 @@ Unlike Mallory, Bob, Carol, and Dan can both provide valid delegation paths that
 {
   "s": {"/": {"bytes": "7aEDQIscUKVuAIB2Yj6jdX5ru9OcnQLxLutvHPjeMD3pbtHIoErFpo7OoC79Oe2ShgQMLbo2e6dvHh9scqHKEOmieA0"}},
   "p": {
-    "h": {"/": {"bytes": "NBIFEgEAcQ"}},
+    "h": {"/": {"bytes": "NAHtAe0BE3E"}},
     "ucan/i/1.0.0-rc.1": {
       "iss": "did:plc:ewvi7nxzyoun6zhxrhs64oiz",
       "sub": "did:key:z6MkrZ1r5XBFZjBU34qyD8fueMbMRkKw17BZaq2ivKFjnz2z",
