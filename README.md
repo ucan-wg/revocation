@@ -169,7 +169,7 @@ invocation.prf.forEach(delegation => {
   // Is the proof in the revocation store?
   store.lookup(delegation).then(revocation => {
     // Is the revocation issuer in this proof chain?
-    if (delegators.includes(revocation.iss)) {
+    if (delegators.includes(revocation.sub)) {
       throw new Error("Invalidated via revocation by delegation issuer")
     }
     
